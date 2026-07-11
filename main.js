@@ -141,21 +141,78 @@ function initUptimeCounter() {
   }, 1000);
 }
 
-// ─── 5. CRT TOGGLE ───────────────────────────────────────────
-function initCRTToggle() {
-  const btn     = $('#crt-toggle');
-  const overlay = $('#crt-overlay');
-  if (!btn || !overlay) return;
+// ─── 5. THEME SWITCHER ────────────────────────────────
+const THEMES = {
+  default: { label: 'DEFAULT', icon: '◉' },
+  mono:    { label: 'MONO',    icon: '◈' },
+  '8bit':  { label: '8-BIT',  icon: '▩' },
+  cat:     { label: 'CAT',     icon: '🐱' },
+};
 
-  let crtOn = false;
+function initThemeSwitcher() {
+  const panel     = $('#theme-panel');
+  const toggleBtn = $('#theme-toggle-btn');
+  const btnIcon   = $('#theme-btn-icon');
+  const btnLabel  = $('#theme-btn-label');
+  const options   = $$('.theme-option');
+  if (!panel || !toggleBtn) return;
 
-  btn.addEventListener('click', () => {
-    crtOn = !crtOn;
-    overlay.classList.toggle('active', crtOn);
-    btn.classList.toggle('crt-on', crtOn);
-    btn.querySelector('.crt-label').textContent = crtOn ? 'CRT ON' : 'CRT';
-    showToast(crtOn ? '[CRT MODE: ENABLED]' : '[CRT MODE: DISABLED]', crtOn ? 'granted' : 'denied');
+  // Restore saved theme
+  const saved = localStorage.getItem('portfolio-theme') || 'default';
+  applyTheme(saved);
+
+  // Toggle panel open/close
+  toggleBtn.addEventListener('click', e => {
+    e.stopPropagation();
+    const isOpen = panel.classList.toggle('open');
+    toggleBtn.classList.toggle('active', isOpen);
+    toggleBtn.setAttribute('aria-expanded', String(isOpen));
+    panel.setAttribute('aria-hidden', String(!isOpen));
   });
+
+  // Click outside to close
+  document.addEventListener('click', e => {
+    if (!$('#theme-switcher').contains(e.target)) {
+      panel.classList.remove('open');
+      toggleBtn.classList.remove('active');
+      toggleBtn.setAttribute('aria-expanded', 'false');
+      panel.setAttribute('aria-hidden', 'true');
+    }
+  });
+
+  // Theme option clicks
+  options.forEach(opt => {
+    opt.addEventListener('click', () => {
+      const theme = opt.dataset.theme;
+      applyTheme(theme);
+      localStorage.setItem('portfolio-theme', theme);
+      // Close panel
+      panel.classList.remove('open');
+      toggleBtn.classList.remove('active');
+      toggleBtn.setAttribute('aria-expanded', 'false');
+      panel.setAttribute('aria-hidden', 'true');
+    });
+  });
+
+  function applyTheme(theme) {
+    const t = THEMES[theme] || THEMES.default;
+    // Set body attribute
+    if (theme === 'default') {
+      document.body.removeAttribute('data-theme');
+    } else {
+      document.body.setAttribute('data-theme', theme);
+    }
+    // Update button display
+    if (btnIcon)  btnIcon.textContent  = t.icon;
+    if (btnLabel) btnLabel.textContent = t.label;
+    // Update aria-selected on options
+    options.forEach(opt => {
+      opt.setAttribute('aria-selected', opt.dataset.theme === theme ? 'true' : 'false');
+    });
+    // Show toast
+    const labels = { default: 'DEFAULT MODE', mono: 'MONOCHROME MODE', '8bit': '8-BIT MODE', cat: 'CAT MODE 🐱' };
+    showToast(`[THEME: ${labels[theme] || theme.toUpperCase()}]`, theme === 'default' ? 'granted' : 'granted');
+  }
 }
 
 // ─── 6. ACCESS TOAST ─────────────────────────────────────────
@@ -480,7 +537,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initMatrixRain();
   initBootSequence();
   initUptimeCounter();
-  initCRTToggle();
+  initThemeSwitcher();
   initActiveNav();
   initSkillBars();
   initNetworkGraph();
@@ -492,4 +549,239 @@ document.addEventListener('DOMContentLoaded', () => {
   // ── Cat animations ──
   initGhostCats();
   initPawTrail();
+  initCatButtonEffect();
+  initCatCursorFollower();
 });
+
+// ─── CAT CURSOR FOLLOWER (oneko.gif) ─────────────────────────
+function initCatCursorFollower() {
+  const SPRITE = 'oneko.gif';
+  const SIZE   = 32;
+
+  // Sprite sheet offsets (multiply by SIZE for background-position px)
+  const SPRITES = {
+    idle:        [[-3,-3]],
+    alert:       [[-7,-3]],
+    tired:       [[-3,-2]],
+    sleeping:    [[-2, 0],[-2,-1]],
+    scratchSelf: [[-5, 0],[-6, 0],[-7, 0]],
+    N:  [[-1,-2],[-1,-3]],
+    NE: [[ 0,-2],[ 0,-3]],
+    E:  [[-3, 0],[-3,-1]],
+    SE: [[-5,-1],[-5,-2]],
+    S:  [[-6,-3],[-7,-2]],
+    SW: [[-5,-3],[-6,-1]],
+    W:  [[-4,-2],[-4,-3]],
+    NW: [[-1, 0],[-1,-1]],
+  };
+
+  // Build div element
+  const el = document.createElement('div');
+  el.id = 'cat-cursor';
+  el.setAttribute('aria-hidden', 'true');
+  Object.assign(el.style, {
+    width:             `${SIZE}px`,
+    height:            `${SIZE}px`,
+    position:          'fixed',
+    zIndex:            '9995',
+    pointerEvents:     'none',
+    backgroundImage:   `url("${SPRITE}")`,
+    backgroundRepeat:  'no-repeat',
+    imageRendering:    'pixelated',
+    opacity:           '0',
+    transition:        'opacity 0.3s ease',
+    transform:         'scale(1.8)',
+    transformOrigin:   'top left',
+    filter:            'drop-shadow(0 2px 4px rgba(243,139,168,0.5))',
+  });
+  document.body.appendChild(el);
+
+  function setSprite(name, frame) {
+    const set = SPRITES[name] || SPRITES.idle;
+    const [sx, sy] = set[Math.abs(frame) % set.length];
+    el.style.backgroundPosition = `${sx * SIZE}px ${sy * SIZE}px`;
+  }
+
+  let posX = 32, posY = 32;
+  let mouseX = 0, mouseY = 0;
+  let frame = 0, idleTime = 0;
+  let idleAnim = null, idleFrame = 0;
+  let active = false, rafId = null;
+  const SPEED = 10;
+
+  function resetIdle() { idleAnim = null; idleFrame = 0; }
+
+  function doIdle() {
+    idleTime++;
+    if (idleTime > 25 && !idleAnim && Math.random() < 0.005) {
+      idleAnim = ['sleeping','scratchSelf'][Math.floor(Math.random() * 2)];
+    }
+    if (idleAnim === 'sleeping') {
+      if (idleFrame < 8) { setSprite('tired', 0); }
+      else               { setSprite('sleeping', Math.floor(idleFrame / 4)); }
+      if (idleFrame > 192) resetIdle();
+    } else if (idleAnim === 'scratchSelf') {
+      setSprite('scratchSelf', idleFrame);
+      if (idleFrame > 9) resetIdle();
+    } else {
+      setSprite('idle', 0);
+    }
+    idleFrame++;
+  }
+
+  function tick() {
+    if (!active) return;
+    frame++;
+    const dx = posX - mouseX;
+    const dy = posY - mouseY;
+    const dist = Math.hypot(dx, dy);
+
+    if (dist < SPEED) {
+      doIdle();
+      rafId = requestAnimationFrame(tick);
+      return;
+    }
+
+    idleAnim = null; idleFrame = 0; idleTime = 0;
+
+    let dir = '';
+    dir += dy / dist < -0.5 ? 'N' : dy / dist > 0.5 ? 'S' : '';
+    dir += dx / dist < -0.5 ? 'W' : dx / dist > 0.5 ? 'E' : '';
+    setSprite(dir || 'idle', Math.floor(frame / 8));
+
+    posX -= (dx / dist) * SPEED;
+    posY -= (dy / dist) * SPEED;
+    el.style.left = `${Math.round(posX - SIZE / 2)}px`;
+    el.style.top  = `${Math.round(posY - SIZE / 2)}px`;
+    rafId = requestAnimationFrame(tick);
+  }
+
+  document.addEventListener('mousemove', e => {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+  });
+
+  function show() {
+    if (active) return;
+    active = true;
+    el.style.opacity = '1';
+    rafId = requestAnimationFrame(tick);
+  }
+  function hide() {
+    active = false;
+    el.style.opacity = '0';
+    cancelAnimationFrame(rafId);
+  }
+
+  new MutationObserver(() => {
+    document.body.getAttribute('data-theme') === 'cat' ? show() : hide();
+  }).observe(document.body, { attributes: true, attributeFilter: ['data-theme'] });
+
+  if (document.body.getAttribute('data-theme') === 'cat') show();
+}
+
+// ─── CAT BUTTON HOVER (oneko.gif alert pose) ─────────────────
+function initCatButtonEffect() {
+  const SPRITE = 'oneko.gif';
+  const SIZE   = 32;
+
+  // Hover sequence: alert → scratchSelf loop
+  const HOVER_SEQ = [
+    { sx: -7, sy: -3, d: 400 }, // alert
+    { sx: -3, sy: -3, d: 200 }, // idle
+    { sx: -5, sy:  0, d: 150 }, // scratch 1
+    { sx: -6, sy:  0, d: 150 }, // scratch 2
+    { sx: -7, sy:  0, d: 150 }, // scratch 3
+    { sx: -6, sy:  0, d: 150 }, // scratch 2
+    { sx: -5, sy:  0, d: 150 }, // scratch 1
+    { sx: -7, sy: -3, d: 300 }, // alert again
+    { sx: -3, sy: -3, d: 300 }, // idle
+  ];
+
+  // Build sprite element
+  const el = document.createElement('div');
+  el.id = 'cat-sprite';
+  el.setAttribute('aria-hidden', 'true');
+  Object.assign(el.style, {
+    width:             `${SIZE}px`,
+    height:            `${SIZE}px`,
+    position:          'fixed',
+    zIndex:            '9996',
+    pointerEvents:     'none',
+    backgroundImage:   `url("${SPRITE}")`,
+    backgroundRepeat:  'no-repeat',
+    imageRendering:    'pixelated',
+    backgroundPosition:'-224px -96px',
+    opacity:           '0',
+    transition:        'opacity 0.18s ease',
+    transform:         'scale(2)',
+    transformOrigin:   'top left',
+    filter:            'drop-shadow(0 2px 6px rgba(243,139,168,0.6))',
+  });
+  document.body.appendChild(el);
+
+  let seqIdx = 0;
+  let animTimer = null;
+
+  function setFrame(sx, sy) {
+    el.style.backgroundPosition = `${sx * SIZE}px ${sy * SIZE}px`;
+  }
+
+  function startAnim(target) {
+    if (document.body.getAttribute('data-theme') !== 'cat') return;
+    const rect = target.getBoundingClientRect();
+    // Position: to left of element, centered vertically
+    const spriteW = SIZE * 2; // accounting for scale(2)
+    const spriteH = SIZE * 2;
+    const x = rect.left - spriteW - 8;
+    const y = rect.top + (rect.height - spriteH) / 2;
+    el.style.left    = `${Math.max(4, x < 4 ? rect.right + 6 : x)}px`;
+    el.style.top     = `${Math.max(4, Math.min(y, window.innerHeight - spriteH - 4))}px`;
+    el.style.opacity = '1';
+
+    seqIdx = 0;
+    clearTimeout(animTimer);
+    function step() {
+      const { sx, sy, d } = HOVER_SEQ[seqIdx % HOVER_SEQ.length];
+      setFrame(sx, sy);
+      seqIdx++;
+      animTimer = setTimeout(step, d);
+    }
+    step();
+  }
+
+  function stopAnim() {
+    el.style.opacity = '0';
+    clearTimeout(animTimer);
+  }
+
+  // Attach to interactive elements
+  $$('.btn, .theme-option, .theme-toggle-btn, .nav-link, .contact-link').forEach(el => {
+    el.addEventListener('mouseenter', () => startAnim(el));
+    el.addEventListener('mouseleave', stopAnim);
+  });
+
+  // Hide when theme changes away from cat
+  new MutationObserver(() => {
+    if (document.body.getAttribute('data-theme') !== 'cat') stopAnim();
+  }).observe(document.body, { attributes: true, attributeFilter: ['data-theme'] });
+
+  // ── Cat ear injection (unchanged) ──
+  function addEars() {
+    $$('.btn, .theme-toggle-btn').forEach(btn => {
+      if (btn.querySelector('.cat-ear')) return;
+      btn.insertAdjacentHTML('beforeend',
+        '<span class="cat-ear cat-ear--l" aria-hidden="true"></span>' +
+        '<span class="cat-ear cat-ear--r" aria-hidden="true"></span>'
+      );
+    });
+  }
+  function removeEars() { $$('.cat-ear').forEach(e => e.remove()); }
+
+  if (document.body.getAttribute('data-theme') === 'cat') addEars();
+  new MutationObserver(() => {
+    document.body.getAttribute('data-theme') === 'cat' ? addEars() : removeEars();
+  }).observe(document.body, { attributes: true, attributeFilter: ['data-theme'] });
+}
+
+

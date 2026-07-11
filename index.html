@@ -11,19 +11,41 @@
   <meta property="og:type" content="website" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Inter:wght@300;400;500;600&family=Press+Start+2P&family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Nunito:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-  <!-- CRT Scanline Overlay -->
-  <div id="crt-overlay" class="crt-overlay" aria-hidden="true"></div>
-
-  <!-- CRT Toggle Button -->
-  <button id="crt-toggle" class="crt-toggle" title="Toggle CRT Mode" aria-label="Toggle CRT scanlines">
-    <span class="crt-icon">▣</span>
-    <span class="crt-label">CRT</span>
-  </button>
+  <!-- ─── THEME SWITCHER ─── -->
+  <div id="theme-switcher" class="theme-switcher" role="complementary" aria-label="Theme switcher">
+    <div id="theme-panel" class="theme-panel" role="listbox" aria-label="Select theme" aria-hidden="true">
+      <button class="theme-option" id="theme-default" role="option" aria-selected="true" data-theme="default">
+        <span class="theme-opt-icon">◉</span>
+        <span class="theme-opt-label">DEFAULT</span>
+        <span class="theme-opt-sub">Current theme</span>
+      </button>
+      <button class="theme-option" id="theme-mono" role="option" aria-selected="false" data-theme="mono">
+        <span class="theme-opt-icon">◈</span>
+        <span class="theme-opt-label">MONO</span>
+        <span class="theme-opt-sub">Phosphor terminal</span>
+      </button>
+      <button class="theme-option" id="theme-8bit" role="option" aria-selected="false" data-theme="8bit">
+        <span class="theme-opt-icon">▩</span>
+        <span class="theme-opt-label">8-BIT</span>
+        <span class="theme-opt-sub">Pixel retro mode</span>
+      </button>
+      <button class="theme-option" id="theme-cat" role="option" aria-selected="false" data-theme="cat">
+        <span class="theme-opt-icon">🐱</span>
+        <span class="theme-opt-label">CAT</span>
+        <span class="theme-opt-sub">Catppuccin mocha</span>
+      </button>
+    </div>
+    <button id="theme-toggle-btn" class="theme-toggle-btn" aria-haspopup="listbox" aria-expanded="false" title="Switch theme">
+      <span class="theme-btn-icon" id="theme-btn-icon">◈</span>
+      <span class="theme-btn-label" id="theme-btn-label">THEME</span>
+      <span class="theme-btn-arrow" id="theme-btn-arrow">▲</span>
+    </button>
+  </div>
 
   <!-- ─── NAVIGATION ─── -->
   <nav class="nav" id="nav" role="navigation" aria-label="Main navigation">
