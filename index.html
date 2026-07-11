@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JOBI BL | Aspiring SOC Analyst</title>
+  <meta name="description" content="Portfolio of JOBI BL — Aspiring SOC Analyst based in Trivandrum, Kerala. Hands-on experience in SIEM, vulnerability scanning, and threat detection." />
+  <meta name="author" content="JOBI BL" />
+  <meta property="og:title" content="JOBI BL | SOC Analyst Portfolio" />
+  <meta property="og:description" content="Detecting threats. Analyzing logs. Defending networks." />
+  <meta property="og:type" content="website" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- CRT Scanline Overlay -->
+  <div id="crt-overlay" class="crt-overlay" aria-hidden="true"></div>
+
+  <!-- CRT Toggle Button -->
+  <button id="crt-toggle" class="crt-toggle" title="Toggle CRT Mode" aria-label="Toggle CRT scanlines">
+    <span class="crt-icon">▣</span>
+    <span class="crt-label">CRT</span>
+  </button>
+
+  <!-- ─── NAVIGATION ─── -->
+  <nav class="nav" id="nav" role="navigation" aria-label="Main navigation">
+    <div class="nav-brand">
+      <span class="prompt-char">root@jobi</span><span class="accent">:~$</span>
+    </div>
+    <ul class="nav-links" role="list">
+      <li><a href="#whoami" class="nav-link" data-section="whoami">/whoami</a></li>
+      <li><a href="#projects" class="nav-link" data-section="projects">/projects</a></li>
+      <li><a href="#skills" class="nav-link" data-section="skills">/skills</a></li>
+      <li><a href="#certifications" class="nav-link" data-section="certifications">/certs</a></li>
+      <li><a href="#contact" class="nav-link" data-section="contact">/contact</a></li>
+    </ul>
+    <div class="nav-status">
+      <span class="status-dot"></span>
+      <span class="status-text">ONLINE</span>
+    </div>
+  </nav>
+
+  <!-- ─── HERO ─── -->
+  <section id="hero" class="hero" aria-label="Hero section">
+    <canvas id="matrix-canvas" aria-hidden="true"></canvas>
+
+    <!-- Decorative Network Graph -->
+    <svg id="network-graph" class="network-graph" aria-hidden="true" viewBox="0 0 800 400" preserveAspectRatio="xMidYMid meet">
+      <!-- Connection Lines -->
+      <line class="net-line" x1="400" y1="200" x2="150" y2="80" />
+      <line class="net-line" x1="400" y1="200" x2="650" y2="80" />
+      <line class="net-line" x1="400" y1="200" x2="130" y2="300" />
+      <line class="net-line" x1="400" y1="200" x2="670" y2="310" />
+      <line class="net-line" x1="400" y1="200" x2="400" y2="360" />
+      <line class="net-line" x1="150" y1="80" x2="650" y2="80" stroke-dasharray="4 8" />
+      <line class="net-line" x1="130" y1="300" x2="400" y2="360" stroke-dasharray="4 8" />
+      <line class="net-line" x1="670" y1="310" x2="400" y2="360" stroke-dasharray="4 8" />
+      <!-- Center Node -->
+      <circle class="net-node net-node--center" cx="400" cy="200" r="14" />
+      <text class="net-label" x="400" y="182" text-anchor="middle">HOST</text>
+      <!-- Satellite Nodes -->
+      <circle class="net-node" cx="150" cy="80" r="8" data-target="whoami" />
+      <text class="net-label net-label--sm" x="150" y="63" text-anchor="middle">/whoami</text>
+      <circle class="net-node" cx="650" cy="80" r="8" data-target="projects" />
+      <text class="net-label net-label--sm" x="650" y="63" text-anchor="middle">/projects</text>
+      <circle class="net-node" cx="130" cy="300" r="8" data-target="skills" />
+      <text class="net-label net-label--sm" x="130" y="320" text-anchor="middle">/skills</text>
+      <circle class="net-node" cx="670" cy="310" r="8" data-target="certifications" />
+      <text class="net-label net-label--sm" x="670" y="330" text-anchor="middle">/certs</text>
+      <circle class="net-node" cx="400" cy="360" r="8" data-target="contact" />
+      <text class="net-label net-label--sm" x="400" y="380" text-anchor="middle">/contact</text>
+      <!-- Ping animations -->
+      <circle class="net-ping" cx="150" cy="80" r="8" />
+      <circle class="net-ping" cx="650" cy="80" r="8" style="animation-delay:0.6s" />
+      <circle class="net-ping" cx="130" cy="300" r="8" style="animation-delay:1.2s" />
+      <circle class="net-ping" cx="670" cy="310" r="8" style="animation-delay:1.8s" />
+      <circle class="net-ping" cx="400" cy="360" r="8" style="animation-delay:2.4s" />
+    </svg>
+
+    <div class="hero-content">
+      <div class="hero-pre-text">
+        <span class="prompt-char">$</span> <span class="cmd-text">identify_user --verbose</span>
+      </div>
+
+      <!-- Animated name reveal -->
+      <h1 class="hero-name" id="hero-name" aria-label="JOBI BL">
+        <span class="name-hack" id="name-hack"></span>
+        <span class="name-real" id="name-real"></span>
+        <span class="blink-cursor" aria-hidden="true">█</span>
+      </h1>
+
+      <p class="hero-title">
+        <span class="accent">[</span>Aspiring SOC Analyst<span class="accent">]</span>
+        <span class="sep">|</span>
+        <span class="hero-location">📍 Trivandrum, Kerala</span>
+      </p>
+
+      <p class="hero-tagline" id="hero-tagline" aria-live="polite"></p>
+
+      <div class="hero-badges">
+        <span class="badge badge--green">● AVAILABLE FOR HIRE</span>
+        <span class="badge badge--dim">EC-Council CSA v2</span>
+        <span class="badge badge--dim">TryHackMe Active</span>
+      </div>
+
+      <div class="hero-actions">
+        <a href="#projects" class="btn btn--primary" id="btn-projects">$ ls ./projects</a>
+        <a href="#contact" class="btn btn--ghost" id="btn-contact">$ cat contact.txt</a>
+        <a href="Jobi_BL_CV.pdf" download="Jobi_BL_CV.pdf" class="btn btn--download" id="btn-download-cv" aria-label="Download CV">
+          <span class="dl-icon">⬇</span> $ wget resume.pdf
+        </a>
+      </div>
+
+      <div class="hero-system-info" aria-hidden="true">
+        <span>OS: KaliLinux 2024.x</span>
+        <span class="sep">|</span>
+        <span>UPTIME: <span id="uptime-counter">00:00:00</span></span>
+        <span class="sep">|</span>
+        <span>THREAT_LEVEL: <span class="accent-green">LOW</span></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Access Toast Notification -->
+  <div id="access-toast" class="access-toast" role="alert" aria-live="assertive" aria-atomic="true">
+    <span id="access-toast-text"></span>
+  </div>
+
+  <!-- ─── WHOAMI ─── -->
+  <section id="whoami" class="section" aria-labelledby="whoami-heading">
+    <div class="container">
+      <h2 class="section-title" id="whoami-heading">
+        <span class="prompt-char">$</span> whoami
+      </h2>
+
+      <div class="whoami-grid">
+        <div class="whoami-card card">
+          <div class="card-header">
+            <span class="file-icon">▸</span> profile.txt
+          </div>
+          <div class="card-body">
+            <p class="bio-text">
+              I'm <strong class="accent-text">Jobi</strong>, based in Trivandrum, Kerala — into cybersecurity, gaming, and languages. 
+              When I'm not breaking things in my home lab, I'm probably editing photos/videos or figuring out how AI and security intersect.
+            </p>
+            <p class="bio-text">
+              Currently completing a project-based internship at <strong>Thiranex</strong> with an EC-Council CSA certification, 
+              actively practicing on TryHackMe, HackTheBox, and OverTheWire. I built a home SOC lab with Wazuh, Kali Linux, 
+              and Ubuntu to simulate real attack scenarios and sharpen my detection instincts.
+            </p>
+          </div>
+        </div>
+
+        <div class="whoami-meta">
+          <div class="card meta-card">
+            <div class="card-header"><span class="file-icon">▸</span> system.conf</div>
+            <ul class="meta-list">
+              <li><span class="meta-key">LOCATION</span><span class="meta-val">Trivandrum, Kerala, IN</span></li>
+              <li><span class="meta-key">EMAIL</span><span class="meta-val"><a href="mailto:jobibl777@gmail.com" class="link">jobibl777@gmail.com</a></span></li>
+              <li><span class="meta-key">PHONE</span><span class="meta-val">+91 7736240524</span></li>
+              <li><span class="meta-key">STATUS</span><span class="meta-val accent-green">SEEKING OPPORTUNITIES</span></li>
+              <li><span class="meta-key">LANGUAGES</span><span class="meta-val">Malayalam • English (B2) • German (A1)</span></li>
+            </ul>
+          </div>
+
+          <div class="card meta-card">
+            <div class="card-header"><span class="file-icon">▸</span> education.log</div>
+            <ul class="edu-list">
+              <li class="edu-item">
+                <span class="edu-title">CICSA — Certified IT Infrastructure & Cyber SOC Analyst</span>
+                <span class="edu-org">RedTeam Hacker Academy, Trivandrum</span>
+                <span class="edu-date">Sep 2025 – Jun 2026</span>
+              </li>
+              <li class="edu-item">
+                <span class="edu-title">Bachelor of Computer Applications</span>
+                <span class="edu-org">East West Institute of Technology, Bangalore University</span>
+                <span class="edu-date">2025</span>
+              </li>
+            </ul>
+          </div>
+
+          <div class="card meta-card">
+            <div class="card-header"><span class="file-icon">▸</span> experience.log</div>
+            <div class="exp-item">
+              <div class="exp-header">
+                <span class="exp-title">Cyber Security Intern</span>
+                <span class="exp-badge">REMOTE</span>
+              </div>
+              <span class="exp-org">Thiranex</span>
+              <span class="exp-date">Jun 2026 – Jul 2026</span>
+              <ul class="exp-bullets">
+                <li>Engineered and tested a Python-based vulnerability scanner and secure authentication system</li>
+                <li>Analyzed network traffic and assessed vulnerabilities using core SOC fundamentals</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── PROJECTS ─── -->
+  <section id="projects" class="section" aria-labelledby="projects-heading">
+    <div class="container">
+      <h2 class="section-title" id="projects-heading">
+        <span class="prompt-char">$</span> ls -la ./projects/
+      </h2>
+      <p class="section-sub">Built during cybersecurity internship and self-study, 2026</p>
+
+      <div class="projects-grid">
+
+        <!-- Project 1 -->
+        <article class="card project-card" id="proj-soc-lab" tabindex="0">
+          <div class="proj-header">
+            <div class="proj-id">
+              <span class="proj-num">01</span>
+              <span class="proj-status proj-status--active">● ACTIVE</span>
+            </div>
+            <div class="proj-tags">
+              <span class="tag">Wazuh SIEM</span>
+              <span class="tag">Kali Linux</span>
+              <span class="tag">Ubuntu</span>
+              <span class="tag">Hydra</span>
+              <span class="tag">MITRE ATT&CK</span>
+            </div>
+          </div>
+          <h3 class="proj-title">Home SOC Lab</h3>
+          <p class="proj-desc">
+            Built a personal detection lab simulating real attack scenarios. Executed SSH brute-force attacks using Hydra, 
+            correlated <strong class="accent-text">468 authentication failure events</strong> in Wazuh SIEM with automatic 
+            MITRE ATT&CK mapping — covering Brute Force, Password Guessing, and SSH techniques.
+          </p>
+          <div class="proj-stats">
+            <div class="stat">
+              <span class="stat-val accent-text">468</span>
+              <span class="stat-label">Events Correlated</span>
+            </div>
+            <div class="stat">
+              <span class="stat-val accent-green">3</span>
+              <span class="stat-label">MITRE Techniques</span>
+            </div>
+            <div class="stat">
+              <span class="stat-val">SSH</span>
+              <span class="stat-label">Attack Vector</span>
+            </div>
+          </div>
+          <div class="proj-footer">
+            <span class="proj-type">&#x1F6E1; Detection Lab</span>
+            <a href="https://github.com/Jobi-bl" target="_blank" rel="noopener noreferrer" class="proj-link">→ github</a>
+          </div>
+        </article>
+
+        <!-- Project 2 -->
+        <article class="card project-card" id="proj-password" tabindex="0">
+          <div class="proj-header">
+            <div class="proj-id">
+              <span class="proj-num">02</span>
+              <span class="proj-status proj-status--done">● COMPLETE</span>
+            </div>
+            <div class="proj-tags">
+              <span class="tag">HTML/JS</span>
+              <span class="tag">SHA-256</span>
+              <span class="tag">Entropy</span>
+            </div>
+          </div>
+          <h3 class="proj-title">Password Strength Analyzer</h3>
+          <p class="proj-desc">
+            Browser-based security tool with live entropy calculation, real-time pattern detection, and SHA-256-based 
+            password reuse prevention. Designed to educate users on credential security without sending data to a server.
+          </p>
+          <div class="proj-footer">
+            <span class="proj-type">🔐 Security Tool</span>
+            <a href="https://github.com/Jobi-bl" target="_blank" rel="noopener noreferrer" class="proj-link">→ github</a>
+          </div>
+        </article>
+
+        <!-- Project 3 -->
+        <article class="card project-card" id="proj-login" tabindex="0">
+          <div class="proj-header">
+            <div class="proj-id">
+              <span class="proj-num">03</span>
+              <span class="proj-status proj-status--done">● COMPLETE</span>
+            </div>
+            <div class="proj-tags">
+              <span class="tag">Flask</span>
+              <span class="tag">SQLite</span>
+              <span class="tag">Argon2</span>
+              <span class="tag">Python</span>
+            </div>
+          </div>
+          <h3 class="proj-title">Secure Login Web Application</h3>
+          <p class="proj-desc">
+            Configured a full-stack authentication system with Argon2 password hashing, secure session management, 
+            and SQL injection prevention. Demonstrates applied knowledge of OWASP authentication best practices.
+          </p>
+          <div class="proj-footer">
+            <span class="proj-type">🌐 Web Security</span>
+            <a href="https://github.com/Jobi-bl" target="_blank" rel="noopener noreferrer" class="proj-link">→ github</a>
+          </div>
+        </article>
+
+        <!-- Project 4 -->
+        <article class="card project-card" id="proj-phishing" tabindex="0">
+          <div class="proj-header">
+            <div class="proj-id">
+              <span class="proj-num">04</span>
+              <span class="proj-status proj-status--done">● COMPLETE</span>
+            </div>
+            <div class="proj-tags">
+              <span class="tag">Scikit-learn</span>
+              <span class="tag">TF-IDF</span>
+              <span class="tag">Python</span>
+              <span class="tag">ML</span>
+            </div>
+          </div>
+          <h3 class="proj-title">ML Phishing Email Detector</h3>
+          <p class="proj-desc">
+            Trained a Logistic Regression classifier using TF-IDF vectorization and hand-crafted features to identify 
+            phishing emails. Combines machine learning with domain-specific cybersecurity feature engineering.
+          </p>
+          <div class="proj-footer">
+            <span class="proj-type">🤖 ML / AI Security</span>
+            <a href="https://github.com/Jobi-bl" target="_blank" rel="noopener noreferrer" class="proj-link">→ github</a>
+          </div>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── SKILLS ─── -->
+  <section id="skills" class="section" aria-labelledby="skills-heading">
+    <div class="container">
+      <h2 class="section-title" id="skills-heading">
+        <span class="prompt-char">$</span> cat skills.conf
+      </h2>
+
+      <div class="skills-grid">
+
+        <div class="card skill-category">
+          <div class="card-header"><span class="file-icon">▸</span> soc_tools/</div>
+          <div class="skill-items">
+            <div class="skill-item">
+              <span class="skill-name">Wazuh SIEM</span>
+              <div class="skill-bar"><div class="skill-fill" style="--fill:80%"></div></div>
+            </div>
+            <div class="skill-item">
+              <span class="skill-name">Wireshark</span>
+              <div class="skill-bar"><div class="skill-fill" style="--fill:70%"></div></div>
+            </div>
+            <div class="skill-item">
+              <span class="skill-name">Splunk</span>
+              <div class="skill-bar"><div class="skill-fill" style="--fill:45%"></div></div>
+            </div>
+            <div class="skill-item">
+              <span class="skill-name">Nmap</span>
+              <div class="skill-bar"><div class="skill-fill" style="--fill:75%"></div></div>
+            </div>
+            <div class="skill-item">
+              <span class="skill-name">Hydra</span>
+              <div class="skill-bar"><div class="skill-fill" style="--fill:65%"></div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card skill-category">
+          <div class="card-header"><span class="file-icon">▸</span> networking/</div>
+          <div class="skill-items">
+            <div class="skill-item">
+              <span class="skill-name">Linux Fundamentals</span>
+              <div class="skill-bar"><div class="skill-fill" style="--fill:78%"></div></div>
+            </div>
+            <div class="skill-item">
+              <span class="skill-name">Network Fundamentals</span>
+              <div class="skill-bar"><div class="skill-fill" style="--fill:72%"></div></div>
+            </div>
+            <div class="skill-item">
+              <span class="skill-name">Port Scanning</span>
+              <div class="skill-bar"><div class="skill-fill" style="--fill:75%"></div></div>
+            </div>
+            <div class="skill-item">
+              <span class="skill-name">Vulnerability Assessment</span>
+              <div class="skill-bar"><div class="skill-fill" style="--fill:68%"></div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card skill-category">
+          <div class="card-header"><span class="file-icon">▸</span> programming/</div>
+          <div class="skill-items">
+            <div class="skill-item">
+              <span class="skill-name">Bash</span>
+              <div class="skill-bar"><div class="skill-fill" style="--fill:65%"></div></div>
+            </div>
+            <div class="skill-item">
+              <span class="skill-name">HTML</span>
+              <div class="skill-bar"><div class="skill-fill" style="--fill:60%"></div></div>
+            </div>
+            <div class="skill-item">
+              <span class="skill-name">Git / GitHub</span>
+              <div class="skill-bar"><div class="skill-fill" style="--fill:70%"></div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card skill-category">
+          <div class="card-header"><span class="file-icon">▸</span> practice_platforms/</div>
+          <div class="platform-list">
+            <div class="platform-item">
+              <span class="platform-icon">⬡</span>
+              <div class="platform-info">
+                <span class="platform-name">TryHackMe</span>
+                <span class="platform-status active">● ACTIVE</span>
+              </div>
+            </div>
+            <div class="platform-item">
+              <span class="platform-icon">⬡</span>
+              <div class="platform-info">
+                <span class="platform-name">HackTheBox</span>
+                <span class="platform-status active">● ACTIVE</span>
+              </div>
+            </div>
+            <div class="platform-item">
+              <span class="platform-icon">⬡</span>
+              <div class="platform-info">
+                <span class="platform-name">OverTheWire</span>
+                <span class="platform-desc">~20 levels completed</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── CERTIFICATIONS ─── -->
+  <section id="certifications" class="section" aria-labelledby="certs-heading">
+    <div class="container">
+      <h2 class="section-title" id="certs-heading">
+        <span class="prompt-char">$</span> ls -la ./certifications/
+      </h2>
+
+      <div class="certs-terminal">
+        <div class="term-header">
+          <span class="term-dot term-dot--red"></span>
+          <span class="term-dot term-dot--yellow"></span>
+          <span class="term-dot term-dot--green"></span>
+          <span class="term-title">cert_vault.sh</span>
+        </div>
+        <div class="term-body">
+          <div class="term-line">
+            <span class="term-prompt">jobi@soc-lab:~$</span>
+            <span class="term-cmd"> ls -la ./certifications/</span>
+          </div>
+          <div class="term-line term-output">total 3</div>
+
+          <div class="cert-entry" id="cert-1">
+            <div class="cert-perms">-rw-r--r--</div>
+            <div class="cert-info">
+              <div class="cert-main">
+                <span class="cert-name">Certified SOC Analyst (CSA) v2</span>
+                <span class="cert-badge cert-badge--verified">VERIFIED</span>
+              </div>
+              <div class="cert-meta">
+                <span class="cert-issuer">EC-Council</span>
+                <span class="cert-date">Jun 2026 – Jul 2027</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="cert-entry" id="cert-2">
+            <div class="cert-perms">-rw-r--r--</div>
+            <div class="cert-info">
+              <div class="cert-main">
+                <span class="cert-name">Cybersecurity Job Simulation</span>
+                <span class="cert-badge cert-badge--complete">COMPLETE</span>
+              </div>
+              <div class="cert-meta">
+                <span class="cert-issuer">Mastercard / Forage</span>
+                <span class="cert-date">Feb 2026</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="cert-entry" id="cert-3">
+            <div class="cert-perms">-rw-r--r--</div>
+            <div class="cert-info">
+              <div class="cert-main">
+                <span class="cert-name">Cybersecurity Analyst Job Simulation</span>
+                <span class="cert-badge cert-badge--complete">COMPLETE</span>
+              </div>
+              <div class="cert-meta">
+                <span class="cert-issuer">Tata / Forage</span>
+                <span class="cert-date">Feb 2026</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="cert-entry" id="cert-4">
+            <div class="cert-perms">-rw-r--r--</div>
+            <div class="cert-info">
+              <div class="cert-main">
+                <span class="cert-name">Certified IT Infrastructure & Cyber SOC Analyst (CICSA)</span>
+                <span class="cert-badge cert-badge--verified">VERIFIED</span>
+              </div>
+              <div class="cert-meta">
+                <span class="cert-issuer">RedTeam Hacker Academy, Trivandrum</span>
+                <span class="cert-date">Sep 2025 – Jun 2026</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="term-line term-output term-blink">
+            <span class="term-prompt">jobi@soc-lab:~$</span>
+            <span class="blink-cursor">█</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── CONTACT ─── -->
+  <section id="contact" class="section" aria-labelledby="contact-heading">
+    <div class="container">
+      <h2 class="section-title" id="contact-heading">
+        <span class="prompt-char">$</span> cat contact.txt
+      </h2>
+
+      <div class="contact-grid">
+        <div class="contact-links-col">
+          <div class="card contact-card">
+            <div class="card-header"><span class="file-icon">▸</span> links.conf</div>
+            <div class="contact-links">
+              <a href="mailto:jobibl777@gmail.com" class="contact-link" id="link-email" aria-label="Send email">
+                <span class="contact-link-icon">✉</span>
+                <div class="contact-link-info">
+                  <span class="contact-link-label">EMAIL</span>
+                  <span class="contact-link-val">jobibl777@gmail.com</span>
+                </div>
+              </a>
+              <a href="https://www.linkedin.com/in/jobi-b-l" target="_blank" rel="noopener noreferrer" class="contact-link" id="link-linkedin" aria-label="LinkedIn profile">
+                <span class="contact-link-icon">in</span>
+                <div class="contact-link-info">
+                  <span class="contact-link-label">LINKEDIN</span>
+                  <span class="contact-link-val">linkedin.com/in/jobi-b-l</span>
+                </div>
+              </a>
+              <a href="https://github.com/Jobi-bl" target="_blank" rel="noopener noreferrer" class="contact-link" id="link-github" aria-label="GitHub profile">
+                <span class="contact-link-icon">⌥</span>
+                <div class="contact-link-info">
+                  <span class="contact-link-label">GITHUB</span>
+                  <span class="contact-link-val">github.com/Jobi-bl</span>
+                </div>
+              </a>
+              <a href="tel:+917736240524" class="contact-link" id="link-phone" aria-label="Call phone">
+                <span class="contact-link-icon">☎</span>
+                <div class="contact-link-info">
+                  <span class="contact-link-label">PHONE</span>
+                  <span class="contact-link-val">+91 7736240524</span>
+                </div>
+              </a>
+              <a href="Jobi_BL_CV.pdf" download="Jobi_BL_CV.pdf" class="contact-link contact-link--download" id="link-download-cv" aria-label="Download CV PDF">
+                <span class="contact-link-icon">⬇</span>
+                <div class="contact-link-info">
+                  <span class="contact-link-label">RESUME</span>
+                  <span class="contact-link-val">Download CV <span class="dl-badge">PDF</span></span>
+                </div>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <div class="contact-form-col">
+          <div class="card contact-form-card">
+            <div class="card-header"><span class="file-icon">▸</span> send_message.sh</div>
+            <form id="contact-form" class="contact-form" novalidate>
+              <div class="form-field">
+                <label for="field-name" class="form-label">$ NAME</label>
+                <input type="text" id="field-name" name="name" class="form-input" placeholder="your_name" autocomplete="name" required />
+                <span class="form-error" id="err-name"></span>
+              </div>
+              <div class="form-field">
+                <label for="field-email" class="form-label">$ EMAIL</label>
+                <input type="email" id="field-email" name="email" class="form-input" placeholder="your@email.com" autocomplete="email" required />
+                <span class="form-error" id="err-email"></span>
+              </div>
+              <div class="form-field">
+                <label for="field-msg" class="form-label">$ MESSAGE</label>
+                <textarea id="field-msg" name="message" class="form-input form-textarea" placeholder="Enter your message..." rows="4" required></textarea>
+                <span class="form-error" id="err-msg"></span>
+              </div>
+              <button type="submit" class="btn btn--primary btn--full" id="btn-submit">
+                <span class="btn-text">$ ./send --encrypt</span>
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── FOOTER ─── -->
+  <footer class="footer" role="contentinfo">
+    <div class="container footer-inner">
+      <div class="footer-left">
+        <span class="footer-brand">root@jobi-bl<span class="accent">:~$</span></span>
+        <span class="footer-copy">© 2026 JOBI BL — All rights reserved.</span>
+      </div>
+      <div class="footer-right">
+        <span class="footer-micro" aria-hidden="true">01001010 01001111 01000010 01001001</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="main.js"></script>
+</body>
+</html>
