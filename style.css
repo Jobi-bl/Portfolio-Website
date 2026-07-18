@@ -1607,6 +1607,24 @@ body[data-theme="cat"] .theme-panel::before {
 .cert-issuer { color: var(--text-dim); }
 .cert-date { color: var(--text-faint); }
 
+.cert-verify-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  margin-top: 4px;
+  font-size: 0.62rem;
+  font-family: var(--font-mono);
+  color: var(--text-faint);
+  text-decoration: none;
+  letter-spacing: 0.06em;
+  transition: color var(--t-normal);
+}
+.cert-verify-link:hover { color: var(--accent-green); }
+.cert-verify-icon { font-size: 0.75rem; }
+body[data-theme="cat"] .cert-verify-link:hover { color: #a6e3a1; }
+body[data-theme="mono"] .cert-verify-link:hover { color: #cccccc; }
+
+
 .term-blink { margin-top: var(--space-md); }
 
 /* ═══════════════════════════════════════════
