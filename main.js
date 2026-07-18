@@ -546,12 +546,159 @@ document.addEventListener('DOMContentLoaded', () => {
   initNavScroll();
   initCardGlitch();
   initSectionReveal();
+  initTerminalBg();
   // ── Cat animations ──
   initGhostCats();
   initPawTrail();
   initCatButtonEffect();
   initCatCursorFollower();
 });
+
+// ─── TERMINAL BACKGROUND LINES ───────────────────────────────
+function initTerminalBg() {
+  // ── Line pools ──
+  const COMMANDS = [
+    'nmap -sV -p 1-65535 192.168.1.0/24',
+    'sudo tail -f /var/log/syslog',
+    'tcpdump -i eth0 -n port 443',
+    'grep -r "FAILED" /var/log/auth.log',
+    'ssh -i ~/.ssh/id_rsa root@10.0.0.1',
+    'wireshark -k -i wlan0',
+    'hydra -l admin -P rockyou.txt ssh://10.10.14.1',
+    'hashcat -m 0 hash.txt rockyou.txt',
+    'airmon-ng start wlan0',
+    'netstat -tulnp | grep LISTEN',
+    'ps aux | grep suspicious',
+    'find / -perm -4000 -type f 2>/dev/null',
+    'ls -la /etc/passwd /etc/shadow',
+    'curl -s http://10.10.10.1/api/v1/users',
+    'john --wordlist=rockyou.txt hashes.txt',
+    'volatility -f mem.raw imageinfo',
+    'sqlmap -u "http://target.com/?id=1" --dbs',
+    'msfconsole -q -x "use exploit/multi/handler"',
+    'chmod 600 ~/.ssh/id_rsa && ssh-keygen -t ed25519',
+    'dig @8.8.8.8 target.com ANY',
+  ];
+
+  const BINARY = [
+    '01001010 01001111 01000010 01001001',
+    '0xDEADBEEF 0xCAFEBABE 0xFF00FF00',
+    '48 65 6C 6C 6F 20 57 6F 72 6C 64',
+    '11001010 00110011 10101010 01010101',
+    '0x7F454C46 0x02010100 0x00000000',
+    '01110011 01100101 01100011 01110101',
+    '0xA3F2 >> 0x04 | 0x1B && 0xFF',
+    'SHA256: e3b0c44298fc1c149afb4c8996fb92427a',
+    'MD5: 098f6bcd4621d373cade4e832627b4f6',
+    '4a 6f 62 69 20 42 4c 20 7c 20 53 4f 43',
+  ];
+
+  const LOGS = [
+    '[INFO]  Wazuh SIEM: 0 critical alerts',
+    '[ALERT] Intrusion attempt detected — src 185.220.101.47',
+    '[INFO]  TLS handshake complete — cipher AES256-GCM',
+    '[WARN]  Port scan detected from 10.0.0.54',
+    '[INFO]  Firewall rule applied: DROP IN tcp dpt:22',
+    '[OK]    Vulnerability scan complete — 3 findings',
+    '[INFO]  SIEM correlation rule triggered: brute-force',
+    '[ALERT] Anomalous outbound traffic: 10.0.0.12 → 104.21.x.x',
+    '[INFO]  Suricata: ET SCAN potential ssh scan',
+    '[INFO]  Deploying honeypot on 192.168.99.1:2222',
+    '[OK]    Patch applied: CVE-2024-3094 (XZ backdoor)',
+    '[WARN]  Privilege escalation attempt — uid 1001 → 0',
+    '[INFO]  Hash verified: SHA256 match confirmed',
+    '[ALERT] C2 beacon pattern detected — interval 60s',
+    '[INFO]  Network topology updated: 14 hosts online',
+  ];
+
+  const ALL = [...COMMANDS, ...BINARY, ...LOGS];
+
+  // ── Container ──
+  const layer = document.createElement('div');
+  layer.id = 'terminal-bg';
+  layer.setAttribute('aria-hidden', 'true');
+  Object.assign(layer.style, {
+    position:      'fixed',
+    inset:         '0',
+    zIndex:        '0',
+    pointerEvents: 'none',
+    overflow:      'hidden',
+  });
+  document.body.appendChild(layer);
+
+  // ── Theme colour map ──
+  const THEME_COLOR = {
+    default:  'rgba(255,0,60,VAR)',      // red
+    mono:     'rgba(220,220,220,VAR)',   // white
+    '8bit':   'rgba(255,255,0,VAR)',     // yellow
+    cat:      'rgba(203,166,247,VAR)',   // catppuccin mauve
+  };
+
+  function themeColor(opacity) {
+    const t = document.body.getAttribute('data-theme') || 'default';
+    return (THEME_COLOR[t] || THEME_COLOR.default).replace('VAR', opacity);
+  }
+
+  function randomLine() {
+    const text = ALL[Math.floor(Math.random() * ALL.length)];
+    const el   = document.createElement('span');
+    el.textContent = text;
+
+    const top   = Math.random() * 96;       // % of viewport height
+    const left  = Math.random() * 80;       // % of viewport width
+    const dur   = 1800 + Math.random() * 2400; // ms total life
+    const delay = Math.random() * 200;
+
+    Object.assign(el.style, {
+      position:      'absolute',
+      top:           `${top}vh`,
+      left:          `${left}vw`,
+      fontFamily:    '"JetBrains Mono", monospace',
+      fontSize:      `${0.52 + Math.random() * 0.22}rem`,
+      letterSpacing: '0.04em',
+      whiteSpace:    'nowrap',
+      color:         themeColor('0.18'),
+      opacity:       '0',
+      userSelect:    'none',
+      animation:     `tbg-flash ${dur}ms ${delay}ms ease-in-out forwards`,
+    });
+
+    layer.appendChild(el);
+    setTimeout(() => el.remove(), dur + delay + 100);
+  }
+
+  // ── Inject keyframe once ──
+  if (!document.getElementById('tbg-keyframe')) {
+    const style = document.createElement('style');
+    style.id = 'tbg-keyframe';
+    style.textContent = `
+      @keyframes tbg-flash {
+        0%   { opacity: 0; transform: translateY(4px); }
+        12%  { opacity: 1; }
+        75%  { opacity: 1; }
+        100% { opacity: 0; transform: translateY(-4px); }
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  // ── Spawn loop — stagger initial burst then steady pace ──
+  let spawnTimer = null;
+
+  function spawnBatch() {
+    const count = 2 + Math.floor(Math.random() * 2); // 2-3 at once
+    for (let i = 0; i < count; i++) {
+      setTimeout(randomLine, i * 160);
+    }
+    const next = 600 + Math.random() * 900; // every 0.6–1.5s
+    spawnTimer = setTimeout(spawnBatch, next);
+  }
+
+  // Initial burst
+  for (let i = 0; i < 8; i++) setTimeout(randomLine, i * 250);
+  spawnTimer = setTimeout(spawnBatch, 2500);
+}
+
 
 // ─── CAT CURSOR FOLLOWER (oneko.gif) ─────────────────────────
 function initCatCursorFollower() {
