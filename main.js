@@ -540,7 +540,9 @@ async function initBootSequence() {
 // ─── INIT ─────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   initMatrixRain();
+  initLoadingScreen();
   initBootSequence();
+  initScrollProgress();
   initUptimeCounter();
   initThemeSwitcher();
   initActiveNav();
@@ -553,12 +555,393 @@ document.addEventListener('DOMContentLoaded', () => {
   initSectionReveal();
   initClickRipple();
   initTerminalBg();
+  initHiddenTerminal();
   // ── Cat animations ──
   initGhostCats();
   initPawTrail();
   initCatButtonEffect();
   initCatCursorFollower();
 });
+
+// ─── LOADING SCREEN ──────────────────────────────────────────
+function initLoadingScreen() {
+  const screen = document.getElementById('loading-screen');
+  const log    = document.getElementById('ls-log');
+  const bar    = document.getElementById('ls-bar');
+  const skip   = document.getElementById('ls-skip');
+  if (!screen || !log) return;
+
+  const LINES = [
+    { type: 'head',  text: 'PORTFOLIO_OS v1.0 — Security Suite' },
+    { type: 'head',  text: '─'.repeat(40) },
+    { type: 'ok',    text: 'BIOS v2.4.1 initialized' },
+    { type: 'ok',    text: 'CPU: Cyber-Analyst-Core @ 3.6GHz' },
+    { type: 'ok',    text: 'RAM: 16384 MB threat-detection buffer' },
+    { type: 'load',  text: 'Importing security modules...' },
+    { type: 'ok',    text: 'Wazuh SIEM daemon started' },
+    { type: 'ok',    text: 'Suricata IDS: active, monitoring' },
+    { type: 'ok',    text: 'Firewall: 1,337 rules loaded' },
+    { type: 'ok',    text: 'Certificate store: 6 certs verified' },
+    { type: 'ok',    text: 'Threat intel feeds synced' },
+    { type: 'load',  text: 'Mounting /home/jobi-bl...' },
+    { type: 'ok',    text: 'Portfolio interface ready' },
+    { type: 'grant', text: '> ACCESS GRANTED' },
+  ];
+  // Cumulative delay for each line (ms)
+  const DELAYS = [0,30,110,130,110,90,210,140,160,120,110,180,150,450];
+
+  let done = false;
+  function finish() {
+    if (done) return;
+    done = true;
+    screen.classList.add('ls-fade');
+    setTimeout(() => screen.remove(), 620);
+  }
+
+  skip.addEventListener('click', finish);
+  document.addEventListener('keydown', function onEsc(e) {
+    if (e.key === 'Escape') { finish(); document.removeEventListener('keydown', onEsc); }
+  }, { once: false });
+
+  let cumDelay = 0;
+  LINES.forEach((line, i) => {
+    cumDelay += DELAYS[i] || 100;
+    const pct = Math.round((i / (LINES.length - 1)) * 100);
+    setTimeout(() => {
+      const div = document.createElement('div');
+      div.className = 'ls-line';
+      if (line.type === 'ok') {
+        div.innerHTML = `<span class="ls-status ls-status--ok">[  OK  ]</span><span class="ls-text">${line.text}</span>`;
+      } else if (line.type === 'load') {
+        div.innerHTML = `<span class="ls-status ls-status--load">[ LOAD ]</span><span class="ls-text">${line.text}</span>`;
+      } else if (line.type === 'grant') {
+        div.innerHTML = `<span class="ls-text ls-text--grant">${line.text}</span>`;
+      } else {
+        div.innerHTML = `<span class="ls-text ls-text--head">${line.text}</span>`;
+      }
+      log.appendChild(div);
+      if (bar) bar.style.width = `${pct}%`;
+      if (i === LINES.length - 1) setTimeout(finish, 700);
+    }, cumDelay);
+  });
+}
+
+// ─── SCROLL PROGRESS ─────────────────────────────────────────
+function initScrollProgress() {
+  const bar = document.getElementById('scroll-progress');
+  if (!bar) return;
+  function update() {
+    const max = document.documentElement.scrollHeight - window.innerHeight;
+    bar.style.width = max > 0 ? `${(window.scrollY / max) * 100}%` : '0%';
+  }
+  window.addEventListener('scroll', update, { passive: true });
+  update();
+}
+
+// ─── HIDDEN TERMINAL ─────────────────────────────────────────
+function initHiddenTerminal() {
+  // ── Build DOM ──
+  const term = document.createElement('div');
+  term.id = 'hterm';
+  term.setAttribute('aria-label', 'Hidden terminal');
+  term.innerHTML = `
+    <div class="hterm-bar" id="hterm-bar">
+      <span class="hterm-dot hterm-dot--r"></span>
+      <span class="hterm-dot hterm-dot--y"></span>
+      <span class="hterm-dot hterm-dot--g"></span>
+      <span class="hterm-title">jobi@soc-lab: ~</span>
+      <button class="hterm-close" id="hterm-close" aria-label="Close terminal">×</button>
+    </div>
+    <div class="hterm-output" id="hterm-output"></div>
+    <div class="hterm-input-row">
+      <span class="hterm-prompt-label">jobi@soc-lab:~$&nbsp;</span>
+      <input type="text" class="hterm-input" id="hterm-input"
+             autocomplete="off" autocorrect="off" spellcheck="false"
+             aria-label="Terminal input" placeholder="">
+    </div>`;
+  document.body.appendChild(term);
+
+  const hint = document.createElement('div');
+  hint.className = 'hterm-kbd-hint';
+  hint.textContent = '[ ` ] terminal';
+  document.body.appendChild(hint);
+
+  const out    = document.getElementById('hterm-output');
+  const inp    = document.getElementById('hterm-input');
+  const closeB = document.getElementById('hterm-close');
+
+  // ── Command definitions ──
+  let cmdHistory = [], hIdx = -1;
+  const CMDS = {
+    help: () =>
+`\nAvailable commands:\n
+  whoami          identity & contact info
+  ls              list portfolio sections
+  ls certs        list all certifications
+  ls skills       list technical skills
+  ls projects     list projects with details
+  cat about.txt   profile summary
+  cat contact.txt contact details
+  nmap localhost  scan this machine
+  uname -a        system info
+  uptime          how long running
+  date            current date/time
+  ping [target]   ping a target
+  ssh soc-lab     connect to home lab
+  sudo [cmd]      try your luck
+  history         command history
+  clear           clear terminal
+  exit            close terminal\n`,
+
+    whoami: () =>
+`\njobi-bl\n${'─'.repeat(40)}
+Name:     JOBI B L
+Role:     Aspiring SOC Analyst | Cybersecurity Intern
+Location: Trivandrum, Kerala, India
+Email:    jobibl777@gmail.com
+GitHub:   github.com/Jobi-bl
+LinkedIn: linkedin.com/in/jobi-b-l\n`,
+
+    ls: () =>
+`\ntotal 7\ndrwxr-xr-x  hero/\ndrwxr-xr-x  skills/\ndrwxr-xr-x  experience/\ndrwxr-xr-x  projects/\ndrwxr-xr-x  certifications/\ndrwxr-xr-x  contact/\n-rw-r--r--  Jobi_BL_CV.pdf\n`,
+
+    'ls certs': () =>
+`\n-rwxr--r--  Certified SOC Analyst (CSA) v2            EC-Council        Jun 2026
+-rw-r--r--  Cybersecurity Job Simulation               Mastercard/Forage Feb 2026
+-rw-r--r--  Cybersecurity Analyst Job Simulation       Tata/Forage       Feb 2026
+-rw-r--r--  Certified IT Infrastructure & SOC Analyst  RedTeam HA        Jun 2026
+-rwxr--r--  Certified LLM Security Professional        Red Team Leaders  Jul 2026
+-rwxr--r--  CICSA v3                                   RedTeam HA        Jul 2026\n`,
+
+    'ls skills': () =>
+`\n── Defensive ──────────────────────────────────
+  Wazuh SIEM    Suricata IDS    Incident Response
+  Log Analysis  Alert Triage    MITRE ATT&CK
+
+── Offensive / Assessment ─────────────────────
+  Nmap          Metasploit      Burp Suite
+  Kali Linux    OSINT           Vulnerability Scanning
+
+── Development ────────────────────────────────
+  Python        Bash            SQL
+  Secure Auth   REST APIs
+
+── Active Practice ────────────────────────────
+  TryHackMe     HackTheBox      OverTheWire\n`,
+
+    'ls projects': () =>
+`\n01. Python Vulnerability Scanner
+    ├─ Engineered during Thiranex internship (Jun–Jul 2026)
+    └─ Tests auth endpoints, SQLi, XSS attack vectors
+
+02. Home SOC Lab
+    ├─ Stack: Wazuh + Kali Linux + Ubuntu VMs
+    └─ Real attack simulation & alert triage practice
+
+03. Phishing Email Detector
+    ├─ NLP + ML classification model
+    └─ github.com/Jobi-bl/Phishing-email-detection-model
+
+04. Secure Login System
+    └─ github.com/Jobi-bl/Secure-login-system-\n`,
+
+    'cat about.txt': () =>
+`\nCybersecurity intern with hands-on project experience in
+vulnerability scanning, secure authentication, SIEM-based
+detection, and network fundamentals.
+
+Built a home SOC lab using Wazuh, Kali Linux, and Ubuntu
+to practice real attack simulation and alert triage.
+
+Currently completing a project-based internship at Thiranex
+with an EC-Council Certified SOC Analyst (CSA) certification
+and active practice on TryHackMe, HackTheBox, OverTheWire.\n`,
+
+    'cat contact.txt': () =>
+`\nEmail:    jobibl777@gmail.com
+Phone:    +91 7736240524
+GitHub:   github.com/Jobi-bl
+LinkedIn: linkedin.com/in/jobi-b-l
+Location: Trivandrum, Kerala, India\n`,
+
+    'nmap localhost': () =>
+`\nStarting Nmap 7.94 ( https://nmap.org )
+Host: localhost (127.0.0.1) is up (0.0001s latency)
+
+PORT     STATE    SERVICE   VERSION
+80/tcp   open     http      Portfolio OS v1.0
+443/tcp  open     https     TLS 1.3 (ECDHE-RSA-AES256-GCM)
+22/tcp   filtered ssh       [firewall drop]
+3306/tcp filtered mysql     [firewall drop]
+
+Nmap done: 1 IP address scanned in 0.42s\n`,
+
+    'uname -a': () =>
+`\nPortfolioOS 5.15.0-soc-analyst #1 SMP ${new Date().getFullYear()}
+Architecture: x86_64   Defense Level: MAXIMUM
+Threat Status: MONITORING   Incidents: 0\n`,
+
+    uptime: () => {
+      const t = new Date();
+      return `\n${t.toLocaleTimeString()} up 365 days, always monitoring, 1 user (jobi)\nload average: 0.00 threats, 0.00 breaches, 0.00 incidents\n`;
+    },
+    date: () => `\n${new Date().toString()}\n`,
+
+    'ssh soc-lab': () =>
+`\nConnecting to soc-lab.local (192.168.1.100)...
+Warning: Permanently added 'soc-lab.local' to known hosts.
+
+Last login: ${new Date().toDateString()} from 192.168.1.42
+
+ ██╗  ██╗ ██████╗ ███╗   ███╗███████╗    ██╗      █████╗ ██████╗
+ ██║  ██║██╔═══██╗████╗ ████║██╔════╝    ██║     ██╔══██╗██╔══██╗
+ ███████║██║   ██║██╔████╔██║█████╗      ██║     ███████║██████╔╝
+ ██╔══██║██║   ██║██║╚██╔╝██║██╔══╝      ██║     ██╔══██║██╔══██╗
+ ██║  ██║╚██████╔╝██║ ╚═╝ ██║███████╗    ███████╗██║  ██║██████╔╝
+ ╚═╝  ╚═╝ ╚═════╝ ╚═╝     ╚═╝╚══════╝    ╚══════╝╚═╝  ╚═╝╚═════╝
+
+[jobi@kali-soc ~]$ _\n`,
+  };
+
+  function esc(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  function print(cmd, result, isErr) {
+    if (cmd !== null) {
+      const row = document.createElement('div');
+      row.innerHTML = `<span class="hterm-row-prompt">jobi@soc-lab:~$</span> <span class="hterm-row-cmd">${esc(cmd)}</span>`;
+      out.appendChild(row);
+    }
+    if (result !== null && result !== undefined) {
+      const r = document.createElement('span');
+      r.className = isErr ? 'hterm-out-err' : 'hterm-out-text';
+      r.textContent = result;
+      out.appendChild(r);
+    }
+    out.scrollTop = out.scrollHeight;
+  }
+
+  let welcomed = false;
+  function welcome() {
+    if (welcomed) return;
+    welcomed = true;
+    const w = document.createElement('span');
+    w.className = 'hterm-out-ok';
+    w.textContent =
+`\nPortfolioOS Terminal v1.0 — Jobi BL Security Suite
+Type 'help' for available commands. Press \` to toggle.\n${'─'.repeat(50)}\n`;
+    out.appendChild(w);
+  }
+
+  function runCmd(raw) {
+    const t = raw.trim();
+    if (!t) return;
+    if (cmdHistory[cmdHistory.length - 1] !== t) cmdHistory.push(t);
+    hIdx = cmdHistory.length;
+
+    if (t === 'clear') { out.innerHTML = ''; return; }
+    if (t === 'exit')  { closeTerm(); return; }
+    if (t === 'history') {
+      print(t, '\n' + cmdHistory.map((h, i) => `  ${String(i+1).padStart(3)}  ${h}`).join('\n') + '\n', false);
+      return;
+    }
+
+    const parts = t.split(' ');
+    const base  = parts[0].toLowerCase();
+
+    // sudo
+    if (base === 'sudo') {
+      const sub = parts.slice(1).join(' ');
+      if (sub.includes('rm') && sub.includes('-rf')) {
+        print(t, '\nPermission denied. Nice try! 😄 Your portfolio is safe.\n', true);
+      } else {
+        print(t, `\n[sudo] password for jobi: ****\njobi is not in the sudoers file. This incident will be reported.\n`, true);
+      }
+      return;
+    }
+
+    // ping
+    if (base === 'ping') {
+      const tgt = parts[1] || 'localhost';
+      print(t, `\nPING ${tgt} 56(84) bytes of data\n64 bytes from ${tgt}: icmp_seq=1 ttl=64 time=0.042 ms\n64 bytes from ${tgt}: icmp_seq=2 ttl=64 time=0.039 ms\n64 bytes from ${tgt}: icmp_seq=3 ttl=64 time=0.041 ms\n\n--- ${tgt} ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss\n`, false);
+      return;
+    }
+
+    if (base === 'nmap') { print(t, CMDS['nmap localhost'](), false); return; }
+    if (base === 'ssh')  { print(t, CMDS['ssh soc-lab'](),  false); return; }
+
+    // easter eggs
+    const EGGS = {
+      'hack':           '\n  [HACK THE PLANET!] 💻🔥\n\n  "Hackers are the immune system of the internet."\n                    — Unknown SOC Analyst\n',
+      'hack the planet':'\n  [HACK THE PLANET!] 💻🔥\n\n  Wake up, Neo. Follow the white rabbit. 🐇\n',
+      'matrix':         '\n  Wake up, Neo...\n  The Matrix has you.\n  Follow the white rabbit. 🐇\n',
+      'cat flag.txt':   '\n  flag{s0c_4n4lyst_1n_th3_mak1ng} 🏆\n  Nice try — keep hacking!\n',
+      'ls /':           '\nbin/  boot/  dev/  etc/  home/  jobi/  proc/  secrets/  var/\n',
+      'cat /jobi/secrets': '\nPermission denied.\n(There are no secrets — just hard work and consistency.)\n',
+      'hello':          '\nHello! 👋 Welcome to my portfolio terminal.\nType "help" to see what I can do.\n',
+      'pwd':            '\n/home/jobi-bl/portfolio\n',
+      'whoami --full':  '\nA passionate cybersecurity intern who loves\nbuilding SOC labs, chasing flags, and defending networks.\n',
+    };
+
+    if (EGGS[t]) { print(t, EGGS[t], false); return; }
+
+    if (CMDS[t])    { print(t, CMDS[t](),    false); return; }
+    if (CMDS[base]) { print(t, CMDS[base](), false); return; }
+
+    print(t, `\nbash: ${esc(base)}: command not found\nType 'help' for available commands.\n`, true);
+  }
+
+  // ── Input events ──
+  inp.addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+      const v = inp.value; inp.value = '';
+      runCmd(v);
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      if (hIdx > 0) { hIdx--; inp.value = cmdHistory[hIdx] || ''; }
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      if (hIdx < cmdHistory.length - 1) { hIdx++; inp.value = cmdHistory[hIdx]; }
+      else { hIdx = cmdHistory.length; inp.value = ''; }
+    }
+  });
+
+  function closeTerm() { term.classList.remove('open'); }
+  closeB.addEventListener('click', closeTerm);
+
+  // ── Toggle with backtick ──
+  document.addEventListener('keydown', e => {
+    if (e.key === '`' && !e.target.matches('input,textarea,[contenteditable]')) {
+      e.preventDefault();
+      const opening = term.classList.toggle('open');
+      if (opening) { welcome(); inp.focus(); }
+    }
+    if (e.key === 'Escape' && term.classList.contains('open')) closeTerm();
+  });
+
+  // ── Drag ──
+  let dragging = false, ox = 0, oy = 0;
+  document.getElementById('hterm-bar').addEventListener('mousedown', e => {
+    dragging = true;
+    const r = term.getBoundingClientRect();
+    ox = e.clientX - r.left;
+    oy = e.clientY - r.top;
+    document.body.style.userSelect = 'none';
+  });
+  document.addEventListener('mousemove', e => {
+    if (!dragging) return;
+    term.style.left      = `${e.clientX - ox}px`;
+    term.style.top       = `${e.clientY - oy}px`;
+    term.style.transform = 'none';
+    term.style.bottom    = 'auto';
+  });
+  document.addEventListener('mouseup', () => {
+    dragging = false;
+    document.body.style.userSelect = '';
+  });
+}
+
 
 
 // ─── THEME GLITCH TRANSITION ─────────────────────────────────
