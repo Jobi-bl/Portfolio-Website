@@ -180,17 +180,22 @@ function initThemeSwitcher() {
     }
   });
 
-  // Theme option clicks
+  // Theme option clicks — with glitch transition
   options.forEach(opt => {
     opt.addEventListener('click', () => {
       const theme = opt.dataset.theme;
-      applyTheme(theme);
-      localStorage.setItem('portfolio-theme', theme);
-      // Close panel
+      const current = document.body.getAttribute('data-theme') || 'default';
+      // Close panel immediately
       panel.classList.remove('open');
       toggleBtn.classList.remove('active');
       toggleBtn.setAttribute('aria-expanded', 'false');
       panel.setAttribute('aria-hidden', 'true');
+      if (current === theme) return;
+      // Play glitch, then switch at 50% through
+      playThemeGlitch(theme, () => {
+        applyTheme(theme);
+        localStorage.setItem('portfolio-theme', theme);
+      });
     });
   });
 
@@ -555,6 +560,141 @@ document.addEventListener('DOMContentLoaded', () => {
   initCatCursorFollower();
 });
 
+
+// ─── THEME GLITCH TRANSITION ─────────────────────────────────
+function playThemeGlitch(toTheme, onDone) {
+  const DURATION = 400;
+  const W = window.innerWidth;
+  const H = window.innerHeight;
+
+  const canvas = document.createElement('canvas');
+  canvas.width  = W;
+  canvas.height = H;
+  Object.assign(canvas.style, {
+    position:      'fixed',
+    inset:         '0',
+    zIndex:        '99998',
+    pointerEvents: 'none',
+  });
+  document.body.appendChild(canvas);
+  const ctx = canvas.getContext('2d');
+
+  let applied = false;
+  const start  = performance.now();
+
+  (function frame(now) {
+    const t = Math.min((now - start) / DURATION, 1);
+    const intensity = Math.sin(t * Math.PI); // peaks at t=0.5
+
+    // Apply theme at halfway point
+    if (!applied && t >= 0.5) { applied = true; onDone(); }
+
+    ctx.clearRect(0, 0, W, H);
+
+    if      (toTheme === 'default') glitchChromatic(ctx, intensity, W, H);
+    else if (toTheme === 'mono')    glitchStatic(ctx, intensity, W, H);
+    else if (toTheme === '8bit')    glitchPixels(ctx, intensity, W, H);
+    else if (toTheme === 'cat')     glitchCat(ctx, intensity, W, H);
+    else                            glitchChromatic(ctx, intensity, W, H);
+
+    if (t < 1) requestAnimationFrame(frame);
+    else { if (!applied) onDone(); canvas.remove(); }
+  })(start);
+}
+
+// chromatic aberration — red/blue scan bands
+function glitchChromatic(ctx, k, W, H) {
+  const bands = 6 + Math.floor(Math.random() * 8);
+  for (let i = 0; i < bands; i++) {
+    const y   = Math.random() * H;
+    const h   = 1 + Math.random() * 38 * k;
+    const off = (Math.random() - 0.5) * 40 * k;
+    ctx.fillStyle = `rgba(255,0,60,${0.35 * k})`;
+    ctx.fillRect(off, y, W, h);
+    ctx.fillStyle = `rgba(0,80,255,${0.25 * k})`;
+    ctx.fillRect(-off, y + 3, W, h * 0.7);
+    if (Math.random() > 0.6) {
+      ctx.fillStyle = `rgba(255,255,255,${0.12 * k})`;
+      ctx.fillRect(0, y, W, 1 + Math.random() * 3);
+    }
+  }
+  // horizontal offset slice
+  if (Math.random() > 0.5) {
+    const sy = Math.floor(Math.random() * H);
+    const sh = 4 + Math.floor(Math.random() * 20);
+    try {
+      const slice = ctx.getImageData(0, sy, W, sh);
+      ctx.putImageData(slice, (Math.random() - 0.5) * 20 * k, sy);
+    } catch(_) {}
+  }
+}
+
+// tv static noise — rapid pixel flicker
+function glitchStatic(ctx, k, W, H) {
+  const count = Math.floor(3000 * k);
+  for (let i = 0; i < count; i++) {
+    const x = Math.random() * W;
+    const y = Math.random() * H;
+    const s = 1 + Math.floor(Math.random() * 4);
+    const v = Math.floor(Math.random() * 255);
+    ctx.fillStyle = `rgba(${v},${v},${v},${0.7 * k})`;
+    ctx.fillRect(x, y, s, s);
+  }
+  // dark scanlines
+  for (let y = 0; y < H; y += 3) {
+    ctx.fillStyle = `rgba(0,0,0,${0.12 * k})`;
+    ctx.fillRect(0, y, W, 1);
+  }
+}
+
+// NES pixel blocks — chunky retro glitch
+function glitchPixels(ctx, k, W, H) {
+  const PAL = ['#FF2A00','#FFFF00','#00FF44','#00DDFF','#FF00FF','#FFFFFF','#FF8800','#0033FF'];
+  const blockW = 16;
+  const num = Math.floor(14 * k) + 2;
+  for (let i = 0; i < num; i++) {
+    const bx = Math.floor(Math.random() * (W / blockW)) * blockW;
+    const by = Math.floor(Math.random() * (H / blockW)) * blockW;
+    const bw = blockW * (1 + Math.floor(Math.random() * 8));
+    const bh = blockW * (1 + Math.floor(Math.random() * 3));
+    ctx.globalAlpha = 0.45 + Math.random() * 0.45;
+    ctx.fillStyle   = PAL[Math.floor(Math.random() * PAL.length)];
+    ctx.fillRect(bx, by, bw, bh);
+  }
+  ctx.globalAlpha = 1;
+  // vertical colour split
+  if (Math.random() > 0.4) {
+    const sx = Math.floor(Math.random() * W);
+    ctx.fillStyle = `rgba(255,255,0,${0.08 * k})`;
+    ctx.fillRect(sx, 0, 4, H);
+  }
+}
+
+// Catppuccin pink/mauve bands + 🐾
+function glitchCat(ctx, k, W, H) {
+  // soft pink bloom
+  ctx.fillStyle = `rgba(243,139,168,${0.18 * k})`;
+  ctx.fillRect(0, 0, W, H);
+  // mauve/blue bands
+  const COLS = ['#f38ba8','#cba6f7','#89b4fa','#a6e3a1','#f5c2e7'];
+  const num = Math.floor(8 * k) + 2;
+  for (let i = 0; i < num; i++) {
+    const y = Math.random() * H;
+    const h = 1 + Math.random() * 25 * k;
+    ctx.fillStyle = COLS[Math.floor(Math.random() * COLS.length)] + Math.floor(k * 99).toString(16).padStart(2,'0');
+    ctx.fillRect(0, y, W, h);
+  }
+  // paw text scatter
+  const PAWS = ['🐾','=^.^=','ฅ','(=ↀωↀ=)','>^ω^<'];
+  ctx.font = '1.2rem "JetBrains Mono", monospace';
+  ctx.fillStyle = `rgba(245,194,231,${0.5 * k})`;
+  const np = Math.floor(6 * k);
+  for (let i = 0; i < np; i++) {
+    ctx.fillText(PAWS[Math.floor(Math.random() * PAWS.length)],
+      Math.random() * W, Math.random() * H);
+  }
+}
+
 // ─── CLICK RIPPLE — VIRUS BURST ──────────────────────────────
 function initClickRipple() {
   // ── Character pool: binary, hex, symbols, katakana ──
@@ -598,10 +738,17 @@ function initClickRipple() {
 
   // ── Main burst function ──
   function burst(cx, cy) {
-    shockwave(cx, cy);                              // expanding ring
-    flash(cx, cy);                                  // brief centre flash
-    const count = 45 + Math.floor(Math.random() * 18); // 45–62 particles
-    for (let i = 0; i < count; i++) particle(cx, cy);
+    shockwave(cx, cy);
+    flash(cx, cy);
+    // Primary burst — dense cluster
+    const count = 45 + Math.floor(Math.random() * 18);
+    for (let i = 0; i < count; i++) particle(cx, cy, 30, 280);
+    // Secondary cascade — far fliers covering full screen
+    setTimeout(() => {
+      const maxDist = Math.hypot(window.innerWidth, window.innerHeight);
+      const count2 = 28 + Math.floor(Math.random() * 14);
+      for (let i = 0; i < count2; i++) particle(cx, cy, 280, maxDist * 0.9);
+    }, 190);
   }
 
   // ── Expanding shockwave ring ──
@@ -662,13 +809,12 @@ function initClickRipple() {
   }
 
   // ── Individual particle ──
-  function particle(cx, cy) {
+  function particle(cx, cy, minDist = 30, maxDist = 280) {
     const el   = document.createElement('span');
     el.textContent = POOL[Math.floor(Math.random() * POOL.length)];
 
     const angle = Math.random() * Math.PI * 2;
-    // sqrt bias: dense cluster near center, sparse far fliers — true virus feel
-    const dist  = 30 + Math.pow(Math.random(), 0.45) * 280;
+    const dist  = minDist + Math.pow(Math.random(), 0.45) * (maxDist - minDist);
     const dx    = Math.cos(angle) * dist;
     const dy    = Math.sin(angle) * dist;
     const rot   = (Math.random() - 0.5) * 220;         // ±110° rotation
