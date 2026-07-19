@@ -1840,3 +1840,235 @@ body[data-theme="mono"] .cert-verify-link:hover { color: #cccccc; }
     2px -2px 0 var(--accent-red),
     -2px 2px 0 var(--accent-red);
 }
+
+/* ═══════════════════════════════════════════
+   LOADING SCREEN
+   ═══════════════════════════════════════════ */
+#loading-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  background: #060606;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'JetBrains Mono', monospace;
+  transition: opacity 0.55s ease;
+}
+#loading-screen.ls-fade { opacity: 0; pointer-events: none; }
+
+.ls-inner {
+  width: min(620px, 90vw);
+  padding: 2rem 2.5rem;
+}
+.ls-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding-bottom: 1rem;
+  margin-bottom: 1.2rem;
+  border-bottom: 1px solid rgba(255,0,60,0.25);
+}
+.ls-brand {
+  color: #ff003c;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+}
+.ls-ver { color: rgba(255,255,255,0.2); font-size: 0.6rem; }
+
+.ls-log {
+  min-height: 280px;
+  overflow: hidden;
+  line-height: 1.85;
+  font-size: 0.7rem;
+}
+.ls-line { display: flex; gap: 0.7rem; }
+.ls-status {
+  flex-shrink: 0;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+.ls-status--ok   { color: #a6e3a1; }
+.ls-status--load { color: rgba(255,220,0,0.85); }
+.ls-text         { color: rgba(255,255,255,0.55); }
+.ls-text--head   { color: rgba(255,255,255,0.25); }
+.ls-text--grant  {
+  color: #ff003c;
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-shadow: 0 0 20px rgba(255,0,60,0.5);
+  margin-top: 0.4rem;
+}
+
+.ls-progress-wrap {
+  margin-top: 1.4rem;
+  height: 2px;
+  background: rgba(255,0,60,0.12);
+}
+.ls-bar {
+  height: 100%;
+  width: 0;
+  background: #ff003c;
+  box-shadow: 0 0 8px rgba(255,0,60,0.6);
+  transition: width 0.18s ease;
+}
+.ls-skip {
+  display: block;
+  width: 100%;
+  margin-top: 1rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.55rem;
+  letter-spacing: 0.08em;
+  color: rgba(255,255,255,0.15);
+  text-align: center;
+}
+.ls-skip:hover { color: rgba(255,255,255,0.4); }
+
+/* ═══════════════════════════════════════════
+   SCROLL PROGRESS BAR
+   ═══════════════════════════════════════════ */
+#scroll-progress {
+  position: fixed;
+  top: 0; left: 0;
+  height: 2px;
+  width: 0%;
+  z-index: 9997;
+  pointer-events: none;
+  background: linear-gradient(90deg, #ff003c, #ff6060);
+  box-shadow: 0 0 6px rgba(255,0,60,0.5);
+  transition: width 0.06s linear;
+}
+body[data-theme="mono"] #scroll-progress {
+  background: linear-gradient(90deg, #ddd, #aaa);
+  box-shadow: none;
+}
+body[data-theme="8bit"] #scroll-progress {
+  background: linear-gradient(90deg, #FFFF00, #FF8800);
+  box-shadow: 0 0 6px rgba(255,220,0,0.4);
+}
+body[data-theme="cat"] #scroll-progress {
+  background: linear-gradient(90deg, #f38ba8, #cba6f7);
+  box-shadow: 0 0 6px rgba(203,166,247,0.4);
+}
+
+/* ═══════════════════════════════════════════
+   HIDDEN TERMINAL
+   ═══════════════════════════════════════════ */
+#hterm {
+  position: fixed;
+  z-index: 9990;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(740px, 94vw);
+  max-height: 440px;
+  background: rgba(6,6,8,0.97);
+  border: 1px solid rgba(255,0,60,0.35);
+  border-radius: 6px;
+  box-shadow: 0 24px 70px rgba(0,0,0,0.85), 0 0 40px rgba(255,0,60,0.08);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.73rem;
+  display: none;
+  flex-direction: column;
+  overflow: hidden;
+  backdrop-filter: blur(12px);
+  animation: hterm-in 0.2s ease-out;
+}
+#hterm.open { display: flex; }
+@keyframes hterm-in {
+  from { opacity:0; transform:translateX(-50%) translateY(12px) scale(0.97); }
+  to   { opacity:1; transform:translateX(-50%) translateY(0)    scale(1);    }
+}
+
+.hterm-bar {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 14px;
+  background: rgba(255,255,255,0.035);
+  border-bottom: 1px solid rgba(255,0,60,0.15);
+  cursor: move;
+  user-select: none;
+  flex-shrink: 0;
+}
+.hterm-dot   { width: 11px; height: 11px; border-radius: 50%; }
+.hterm-dot--r { background: #ff5f57; }
+.hterm-dot--y { background: #febc2e; }
+.hterm-dot--g { background: #28c840; }
+.hterm-title {
+  flex: 1;
+  text-align: center;
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  color: rgba(255,255,255,0.3);
+}
+.hterm-close {
+  background: none; border: none; cursor: pointer;
+  color: rgba(255,255,255,0.25); font-size: 1.1rem; line-height: 1; padding: 0;
+}
+.hterm-close:hover { color: #ff5f57; }
+
+.hterm-output {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px 16px 6px;
+  color: rgba(200,200,200,0.8);
+  line-height: 1.75;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,0,60,0.25) transparent;
+}
+.hterm-output::-webkit-scrollbar { width: 3px; }
+.hterm-output::-webkit-scrollbar-thumb { background: rgba(255,0,60,0.25); border-radius: 2px; }
+
+.hterm-row-prompt { color: #ff003c; }
+.hterm-row-cmd    { color: rgba(255,255,255,0.9); }
+.hterm-out-text   { display: block; white-space: pre; color: rgba(180,180,180,0.8); }
+.hterm-out-err    { display: block; white-space: pre; color: #ff6b6b; }
+.hterm-out-ok     { display: block; white-space: pre; color: #a6e3a1; }
+
+.hterm-input-row {
+  display: flex;
+  align-items: center;
+  padding: 7px 16px 9px;
+  border-top: 1px solid rgba(255,0,60,0.12);
+  flex-shrink: 0;
+  gap: 6px;
+}
+.hterm-prompt-label { color: #ff003c; white-space: nowrap; font-size: 0.7rem; }
+.hterm-input {
+  flex: 1; background: none; border: none; outline: none;
+  color: rgba(255,255,255,0.9);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.73rem;
+  caret-color: #ff003c;
+}
+.hterm-kbd-hint {
+  position: fixed; bottom: 18px; right: 22px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.52rem; letter-spacing: 0.07em;
+  color: rgba(255,255,255,0.1); pointer-events: none; z-index: 9989;
+}
+
+/* Theme overrides for terminal */
+body[data-theme="mono"] #hterm { border-color: rgba(200,200,200,0.2); }
+body[data-theme="mono"] .hterm-row-prompt,
+body[data-theme="mono"] .hterm-prompt-label { color: #cccccc; }
+body[data-theme="mono"] .hterm-input { caret-color: #ccc; }
+
+body[data-theme="8bit"] #hterm { border-color: rgba(255,220,0,0.35); box-shadow: 0 0 0 2px rgba(255,220,0,0.08); }
+body[data-theme="8bit"] .hterm-row-prompt,
+body[data-theme="8bit"] .hterm-prompt-label { color: #FFDD00; }
+body[data-theme="8bit"] .hterm-input { caret-color: #FFDD00; }
+
+body[data-theme="cat"] #hterm { background: rgba(24,24,37,0.97); border-color: rgba(203,166,247,0.35); }
+body[data-theme="cat"] .hterm-row-prompt,
+body[data-theme="cat"] .hterm-prompt-label { color: #f38ba8; }
+body[data-theme="cat"] .hterm-input { caret-color: #f38ba8; }
+body[data-theme="cat"] .hterm-out-ok { color: #a6e3a1; }
+
