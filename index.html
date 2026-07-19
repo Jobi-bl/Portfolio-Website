@@ -16,7 +16,24 @@
 </head>
 <body>
 
+  <!-- ─── LOADING SCREEN ─── -->
+  <div id="loading-screen" role="status" aria-live="polite" aria-label="Loading portfolio">
+    <div class="ls-inner">
+      <div class="ls-header">
+        <span class="ls-brand">█ PORTFOLIO_OS</span>
+        <span class="ls-ver">v1.0 · build 2026.07</span>
+      </div>
+      <div class="ls-log" id="ls-log"></div>
+      <div class="ls-progress-wrap"><div class="ls-bar" id="ls-bar"></div></div>
+      <button class="ls-skip" id="ls-skip" aria-label="Skip loading screen">[ ESC / CLICK TO SKIP ]</button>
+    </div>
+  </div>
+
+  <!-- ─── SCROLL PROGRESS ─── -->
+  <div id="scroll-progress" aria-hidden="true"></div>
+
   <!-- ─── THEME SWITCHER ─── -->
+
   <div id="theme-switcher" class="theme-switcher" role="complementary" aria-label="Theme switcher">
     <div id="theme-panel" class="theme-panel" role="listbox" aria-label="Select theme" aria-hidden="true">
       <button class="theme-option" id="theme-default" role="option" aria-selected="true" data-theme="default">
