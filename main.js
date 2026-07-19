@@ -546,6 +546,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initNavScroll();
   initCardGlitch();
   initSectionReveal();
+  initClickRipple();
   initTerminalBg();
   // ── Cat animations ──
   initGhostCats();
@@ -553,6 +554,164 @@ document.addEventListener('DOMContentLoaded', () => {
   initCatButtonEffect();
   initCatCursorFollower();
 });
+
+// ─── CLICK RIPPLE — VIRUS BURST ──────────────────────────────
+function initClickRipple() {
+  // ── Character pool: binary, hex, symbols, katakana ──
+  const POOL = [
+    // binary bias
+    '0','1','0','1','0','1','0','1',
+    // hex
+    'A','B','C','D','E','F','a','b','c','d','e','f',
+    '0','1','2','3','4','5','6','7','8','9',
+    // symbols
+    '#','$','%','@','!','>','<','{','}','[',']',
+    '|','/','\\','^','&','*','~','+','=','?',
+    // katakana (hacker aesthetic)
+    'ア','イ','ウ','エ','オ','カ','キ','ク','ケ','コ',
+    'サ','シ','ス','セ','ソ','ナ','ニ','ヌ','ネ','ノ',
+  ];
+
+  // ── Theme colours [r, g, b] ──
+  const COLORS = {
+    default: [255,  30,  70],   // red
+    mono:    [210, 210, 210],   // white
+    '8bit':  [255, 220,   0],   // yellow
+    cat:     [203, 166, 247],   // catppuccin mauve
+  };
+
+  function rgb(alpha) {
+    const t = document.body.getAttribute('data-theme') || 'default';
+    const [r, g, b] = COLORS[t] || COLORS.default;
+    return `rgba(${r},${g},${b},${alpha})`;
+  }
+
+  // ── Click listener — skip interactive elements ──
+  document.addEventListener('click', e => {
+    if (e.target.closest(
+      'a, button, input, textarea, select, label, ' +
+      '.btn, .nav-link, .theme-toggle-btn, .theme-panel, ' +
+      '.contact-link, .skill-bar, [role="button"]'
+    )) return;
+    burst(e.clientX, e.clientY);
+  });
+
+  // ── Main burst function ──
+  function burst(cx, cy) {
+    shockwave(cx, cy);                              // expanding ring
+    flash(cx, cy);                                  // brief centre flash
+    const count = 45 + Math.floor(Math.random() * 18); // 45–62 particles
+    for (let i = 0; i < count; i++) particle(cx, cy);
+  }
+
+  // ── Expanding shockwave ring ──
+  function shockwave(cx, cy) {
+    const ring = document.createElement('div');
+    Object.assign(ring.style, {
+      position:      'fixed',
+      left:          `${cx}px`,
+      top:           `${cy}px`,
+      width:         '6px',
+      height:        '6px',
+      borderRadius:  '50%',
+      border:        `1.5px solid ${rgb(0.9)}`,
+      transform:     'translate(-50%,-50%)',
+      pointerEvents: 'none',
+      zIndex:        '9997',
+    });
+    document.body.appendChild(ring);
+    ring.animate([
+      { width:'6px',   height:'6px',   opacity:1,   borderWidth:'1.5px' },
+      { width:'180px', height:'180px', opacity:0,   borderWidth:'0.3px' },
+    ], { duration:600, easing:'ease-out', fill:'forwards' })
+      .onfinish = () => ring.remove();
+
+    // Second slower ring
+    const ring2 = ring.cloneNode();
+    ring2.style.border = `1px solid ${rgb(0.5)}`;
+    document.body.appendChild(ring2);
+    ring2.animate([
+      { width:'6px',   height:'6px',   opacity:0.6, borderWidth:'1px' },
+      { width:'280px', height:'280px', opacity:0,   borderWidth:'0.2px' },
+    ], { duration:900, easing:'ease-out', fill:'forwards' })
+      .onfinish = () => ring2.remove();
+  }
+
+  // ── Brief bright centre flash ──
+  function flash(cx, cy) {
+    const dot = document.createElement('div');
+    Object.assign(dot.style, {
+      position:      'fixed',
+      left:          `${cx}px`,
+      top:           `${cy}px`,
+      width:         '8px',
+      height:        '8px',
+      borderRadius:  '50%',
+      background:    rgb(1),
+      transform:     'translate(-50%,-50%)',
+      pointerEvents: 'none',
+      zIndex:        '9999',
+      boxShadow:     `0 0 12px 4px ${rgb(0.6)}`,
+    });
+    document.body.appendChild(dot);
+    dot.animate([
+      { opacity:1, transform:'translate(-50%,-50%) scale(1)' },
+      { opacity:0, transform:'translate(-50%,-50%) scale(3)' },
+    ], { duration:250, easing:'ease-out', fill:'forwards' })
+      .onfinish = () => dot.remove();
+  }
+
+  // ── Individual particle ──
+  function particle(cx, cy) {
+    const el   = document.createElement('span');
+    el.textContent = POOL[Math.floor(Math.random() * POOL.length)];
+
+    const angle = Math.random() * Math.PI * 2;
+    // sqrt bias: dense cluster near center, sparse far fliers — true virus feel
+    const dist  = 30 + Math.pow(Math.random(), 0.45) * 280;
+    const dx    = Math.cos(angle) * dist;
+    const dy    = Math.sin(angle) * dist;
+    const rot   = (Math.random() - 0.5) * 220;         // ±110° rotation
+    const size  = 0.4 + Math.random() * 0.9;           // rem
+    const bold  = Math.random() > 0.55;
+    const dur   = 400 + Math.random() * 700;           // 400–1100ms
+
+    Object.assign(el.style, {
+      position:    'fixed',
+      left:        `${cx}px`,
+      top:         `${cy}px`,
+      fontFamily:  '"JetBrains Mono", monospace',
+      fontSize:    `${size}rem`,
+      fontWeight:  bold ? '700' : '400',
+      color:       rgb(0.95),
+      pointerEvents:'none',
+      zIndex:      '9998',
+      userSelect:  'none',
+      willChange:  'transform, opacity',
+    });
+
+    document.body.appendChild(el);
+
+    el.animate([
+      {
+        opacity:   1,
+        transform: `translate(-50%,-50%) translate(0px,0px) rotate(0deg) scale(1.4)`,
+        textShadow:`0 0 8px ${rgb(0.8)}`,
+      },
+      {
+        opacity:   0,
+        transform: `translate(-50%,-50%) translate(${dx}px,${dy}px) rotate(${rot}deg) scale(0.1)`,
+        textShadow:`0 0 2px ${rgb(0.1)}`,
+      },
+    ], {
+      duration: dur,
+      easing:   'cubic-bezier(0.05, 0.6, 0.25, 1)',
+      fill:     'forwards',
+    }).onfinish = () => el.remove();
+  }
+}
+
+
 
 // ─── TERMINAL BACKGROUND LINES ───────────────────────────────
 function initTerminalBg() {
