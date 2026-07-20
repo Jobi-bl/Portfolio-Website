@@ -15,6 +15,9 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  <!-- Security: never expose the page via iframe, control referrer -->
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
 
   <!-- ─── LOADING SCREEN ─── -->
   <div id="loading-screen" role="status" aria-live="polite" aria-label="Loading portfolio">
@@ -62,9 +65,9 @@
         <span class="theme-opt-sub">Catppuccin mocha</span>
       </button>
       <button class="theme-option" id="theme-crash" role="option" aria-selected="false" data-theme="crash">
-        <span class="theme-opt-icon" style="color:#ff003c;">☠</span>
-        <span class="theme-opt-label" style="color:#ff003c;">404</span>
-        <span class="theme-opt-sub" style="color:#ff003c;">Error 404</span>
+        <span class="theme-opt-icon" style="color:#ff003c;">⚠</span>
+        <span class="theme-opt-label" style="color:#ff003c;">WARNING</span>
+        <span class="theme-opt-sub" style="color:#ff003c;">Do not click.</span>
       </button>
     </div>
     <button id="theme-toggle-btn" class="theme-toggle-btn" aria-haspopup="listbox" aria-expanded="false" title="Switch theme">
@@ -80,7 +83,10 @@
     <div class="nav-brand">
       <span class="prompt-char">root@jobi</span><span class="accent">:~$</span>
     </div>
-    <ul class="nav-links" role="list">
+    <button class="nav-hamburger" id="nav-hamburger" aria-label="Toggle navigation" aria-expanded="false" aria-controls="nav-links-list">
+      <span></span><span></span><span></span>
+    </button>
+    <ul class="nav-links" id="nav-links-list" role="list">
       <li><a href="#whoami" class="nav-link" data-section="whoami">/whoami</a></li>
       <li><a href="#projects" class="nav-link" data-section="projects">/projects</a></li>
       <li><a href="#skills" class="nav-link" data-section="skills">/skills</a></li>
