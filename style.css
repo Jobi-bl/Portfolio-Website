@@ -2073,52 +2073,76 @@ body[data-theme="cat"] .hterm-input { caret-color: #f38ba8; }
 body[data-theme="cat"] .hterm-out-ok { color: #a6e3a1; }
 
 /* ═══════════════════════════════════════════
-   CRASH OVERLAY (BSOD THEME)
+   CRASH OVERLAY — GRAVITY COLLAPSE
    ═══════════════════════════════════════════ */
 #crash-overlay {
   position: fixed;
   inset: 0;
   z-index: 999999;
-  background: #0078D7;
-  color: #fff;
-  font-family: 'Segoe UI', 'Inter', sans-serif;
-  padding: 4rem 8vw;
+  background: #000;
   display: none;
   flex-direction: column;
-  justify-content: center;
-  user-select: none;
-  cursor: none;
-}
-#crash-overlay.active {
-  display: flex;
-}
-.bsod-face {
-  font-size: 8rem;
-  margin-bottom: 2rem;
-  font-weight: 300;
-}
-.bsod-text {
-  font-size: 2rem;
-  line-height: 1.4;
-  margin-bottom: 3rem;
-  font-weight: 300;
-}
-.bsod-details {
-  display: flex;
-  gap: 2rem;
   align-items: center;
+  justify-content: center;
+  gap: 2rem;
 }
-.bsod-qr {
-  width: 120px;
-  height: 120px;
-  background: #fff;
-  padding: 10px;
-  flex-shrink: 0;
+#crash-overlay.active { display: flex; }
+
+.grav-error {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  color: rgba(255,0,60,0.6);
+  letter-spacing: 0.12em;
+  opacity: 0;
+  animation: grav-fade-in 0.4s ease 0.6s forwards;
 }
-.bsod-info {
-  font-size: 1.2rem;
-  line-height: 1.6;
+.grav-code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.55rem;
+  color: rgba(255,255,255,0.15);
+  letter-spacing: 0.06em;
+  opacity: 0;
+  animation: grav-fade-in 0.4s ease 0.9s forwards;
 }
-.bsod-info span {
-  font-size: 0.85rem;
+.grav-reboot-btn {
+  margin-top: 1.5rem;
+  padding: 0.75rem 2.5rem;
+  border: 1px solid rgba(255,0,60,0.5);
+  background: transparent;
+  color: #ff003c;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  letter-spacing: 0.15em;
+  cursor: pointer;
+  opacity: 0;
+  animation: grav-fade-in 0.4s ease 1.2s forwards;
+  transition: background 0.2s, color 0.2s;
 }
+.grav-reboot-btn:hover {
+  background: #ff003c;
+  color: #000;
+}
+
+@keyframes grav-fade-in {
+  to { opacity: 1; }
+}
+
+/* Elements falling off screen */
+@keyframes gravity-fall {
+  0%   { opacity: 1; }
+  20%  { opacity: 1; transform: translateY(var(--fall-nudge, -8px)) rotate(var(--fall-rot, 2deg)); }
+  100% { opacity: 0; transform: translateY(110vh) rotate(var(--fall-rot-end, 18deg)); }
+}
+.gravity-fall {
+  animation: gravity-fall var(--fall-dur, 0.9s) cubic-bezier(0.4, 0, 1, 1) var(--fall-delay, 0ms) both;
+  pointer-events: none;
+}
+/* Restore animation */
+@keyframes gravity-restore {
+  from { opacity: 0; transform: translateY(-60px) rotate(var(--fall-rot, -3deg)); }
+  to   { opacity: 1; transform: translateY(0) rotate(0deg); }
+}
+.gravity-restore {
+  animation: gravity-restore 0.55s cubic-bezier(0.22, 1, 0.36, 1) var(--fall-delay, 0ms) both;
+}
+
