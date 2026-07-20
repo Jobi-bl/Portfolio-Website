@@ -1084,68 +1084,66 @@ function glitchCat(ctx, k, W, H) {
   }
 }
 
-// ─── CRASH SEQUENCE (BSOD PRANK) ────────────────────────
+// ─── CRASH SEQUENCE — GRAVITY COLLAPSE ───────────────────────
 function playCrashSequence() {
   const overlay = document.getElementById('crash-overlay');
   if (!overlay) return;
 
-  // Render BSOD HTML
-  overlay.innerHTML = `
-    <div class="bsod-face">:(</div>
-    <div class="bsod-text">
-      Your PC ran into a problem and needs to restart. We're<br>
-      just collecting some error info, and then we'll restart for<br>
-      you.
-    </div>
-    <div class="bsod-text" style="font-size: 1.5rem;" id="bsod-progress">
-      0% complete
-    </div>
-    <div class="bsod-details">
-      <div class="bsod-qr">
-        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-          <path d="M0,0 h30 v30 h-30 z M10,10 h10 v10 h-10 z" fill="#0078D7"/>
-          <path d="M70,0 h30 v30 h-30 z M80,10 h10 v10 h-10 z" fill="#0078D7"/>
-          <path d="M0,70 h30 v30 h-30 z M10,80 h10 v10 h-10 z" fill="#0078D7"/>
-          <path d="M40,0 h20 v10 h-20 z M50,20 h20 v10 h-20 z M40,40 h60 v10 h-60 z M0,40 h30 v10 h-30 z M40,60 h10 v40 h-10 z M60,60 h10 v10 h-10 z M80,60 h20 v40 h-20 z M60,80 h10 v20 h-10 z" fill="#0078D7"/>
-        </svg>
-      </div>
-      <div class="bsod-info">
-        For more information about this issue and possible fixes, visit<br>
-        https://www.windows.com/stopcode<br><br>
-        <span>If you call a support person, give them this info:<br>
-        Stop code: CRITICAL_PORTFOLIO_OVERLOAD</span>
-      </div>
-    </div>
-  `;
+  // Grab every meaningful page element to drop
+  const targets = [
+    ...document.querySelectorAll(
+      'nav, .hero-section, section, .card, .cert-card, .project-card, ' +
+      '.skill-bar-wrap, .exp-entry, footer, .theme-switcher, #hterm-kbd-hint'
+    )
+  ].filter(el => !el.closest('#crash-overlay') && !el.closest('#loading-screen'));
 
-  // Show it
-  overlay.classList.add('active');
-  
-  // Fake progress counter
-  const progEl = document.getElementById('bsod-progress');
-  let pct = 0;
-  
-  const interval = setInterval(() => {
-    pct += Math.floor(Math.random() * 25) + 5;
-    if (pct >= 100) {
-      pct = 100;
-      clearInterval(interval);
-      progEl.textContent = '100% complete';
-      
-      // Black screen flash like a reboot
-      setTimeout(() => {
-        overlay.style.background = '#000';
-        overlay.innerHTML = '';
-        setTimeout(() => {
-          overlay.classList.remove('active');
-          overlay.style.background = '#0078D7'; // reset for next time
-        }, 1200);
-      }, 500);
-    } else {
-      progEl.textContent = pct + '% complete';
-    }
-  }, 800);
+  if (targets.length === 0) return;
+
+  // ── 1. Apply random fall params to each element ──
+  targets.forEach((el, i) => {
+    const rot    = (Math.random() - 0.5) * 40;            // −20° to +20°
+    const rotEnd = rot + (Math.random() - 0.5) * 30;
+    const dur    = 600 + Math.random() * 500;              // 600–1100ms
+    const delay  = i * 28 + Math.random() * 60;           // staggered
+
+    el.style.setProperty('--fall-rot',     `${rot}deg`);
+    el.style.setProperty('--fall-rot-end', `${rotEnd}deg`);
+    el.style.setProperty('--fall-dur',     `${dur}ms`);
+    el.style.setProperty('--fall-delay',   `${delay}ms`);
+    el.style.setProperty('--fall-nudge',   `${(Math.random() - 0.5) * 16}px`);
+    el.classList.add('gravity-fall');
+  });
+
+  // ── 2. Show void overlay after longest fall finishes ──
+  const maxDelay = targets.length * 28 + 1200;
+  setTimeout(() => {
+    overlay.innerHTML = `
+      <div class="grav-error">FATAL_PORTFOLIO_COLLAPSE</div>
+      <div class="grav-code">
+        exception at 0x${Math.floor(Math.random()*0xFFFFFF).toString(16).toUpperCase().padStart(6,'0')}<br>
+        gravity override failed — all elements unrecoverable
+      </div>
+      <button class="grav-reboot-btn" id="grav-reboot">[ REBOOT SYSTEM ]</button>
+    `;
+    overlay.classList.add('active');
+
+    // ── 3. Reboot — restore everything ──
+    document.getElementById('grav-reboot').addEventListener('click', () => {
+      overlay.classList.remove('active');
+      targets.forEach((el, i) => {
+        const delay = i * 30 + Math.random() * 40;
+        el.classList.remove('gravity-fall');
+        el.style.setProperty('--fall-delay', `${delay}ms`);
+        el.classList.add('gravity-restore');
+        el.addEventListener('animationend', () => {
+          el.classList.remove('gravity-restore');
+          el.style.removeProperty('--fall-delay');
+        }, { once: true });
+      });
+    });
+  }, maxDelay);
 }
+
 
 // ─── CLICK RIPPLE — VIRUS BURST ──────────────────────────────
 function initClickRipple() {
