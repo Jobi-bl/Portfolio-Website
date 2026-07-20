@@ -579,6 +579,11 @@ const isTouch   = () => window.matchMedia('(pointer: coarse)').matches;
 const isReduced = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 document.addEventListener('DOMContentLoaded', () => {
+  // Easter egg hints for developers inspecting the page
+  console.log('%c🔍 Looking under the hood?', 'color: #ff1e1e; font-size: 24px; font-weight: bold;');
+  console.log('%cType "sudo" anywhere on this page to unlock Admin Mode.', 'color: #3fb950; font-size: 16px;');
+  console.log('%cOr press ` (backtick) to open the terminal and try the "crack-wifi" game.', 'color: #e0e0e0; font-size: 14px;');
+  
   initLoadingScreen();
   if (!isReduced()) initMatrixRain();
   initBootSequence();
@@ -740,7 +745,7 @@ function initHiddenTerminal() {
 
   const hint = document.createElement('div');
   hint.className = 'hterm-kbd-hint';
-  hint.textContent = '[ ` ] terminal';
+  hint.textContent = '[ ` ] terminal & games';
   document.body.appendChild(hint);
 
   const out    = document.getElementById('hterm-output');
