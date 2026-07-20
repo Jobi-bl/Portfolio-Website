@@ -28,7 +28,11 @@ function initMatrixRain() {
   const ctx = canvas.getContext('2d');
   let cols, drops, animId;
 
-  const fontSize = 13;
+  // Use larger font on mobile = fewer columns = much better performance
+  const fontSize = window.innerWidth <= 768 ? 20 : 13;
+  // On mobile draw every other frame to halve GPU load
+  let frame = 0;
+  const skipFrames = window.innerWidth <= 768 ? 1 : 0;
 
   function resize() {
     canvas.width  = canvas.offsetWidth;
@@ -38,6 +42,9 @@ function initMatrixRain() {
   }
 
   function draw() {
+    animId = requestAnimationFrame(draw);
+    if (skipFrames && frame++ % 2 !== 0) return;
+
     ctx.fillStyle = 'rgba(10, 10, 10, 0.045)';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -60,7 +67,6 @@ function initMatrixRain() {
       }
       drops[i] += 0.5;
     }
-    animId = requestAnimationFrame(draw);
   }
 
   resize();
@@ -544,9 +550,13 @@ async function initBootSequence() {
 }
 
 // ─── INIT ─────────────────────────────────────────────────────
+const isMobile  = () => window.innerWidth <= 768;
+const isTouch   = () => window.matchMedia('(pointer: coarse)').matches;
+const isReduced = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
 document.addEventListener('DOMContentLoaded', () => {
-  initMatrixRain();
   initLoadingScreen();
+  if (!isReduced()) initMatrixRain();
   initBootSequence();
   initScrollProgress();
   initUptimeCounter();
@@ -557,17 +567,54 @@ document.addEventListener('DOMContentLoaded', () => {
   initContactForm();
   initSmoothScroll();
   initNavScroll();
+  initMobileNav();        // ← hamburger menu
   initCardGlitch();
   initSectionReveal();
   initClickRipple();
-  initTerminalBg();
+  if (!isReduced()) initTerminalBg();
   initHiddenTerminal();
   // ── Cat animations ──
   initGhostCats();
-  initPawTrail();
+  if (!isTouch()) initPawTrail();      // paw trail only on pointer devices
   initCatButtonEffect();
-  initCatCursorFollower();
+  if (!isTouch()) initCatCursorFollower(); // cursor follower: desktop only
 });
+
+// ─── MOBILE NAV — HAMBURGER ───────────────────────────────────
+function initMobileNav() {
+  const btn   = document.getElementById('nav-hamburger');
+  const links = document.getElementById('nav-links-list');
+  if (!btn || !links) return;
+
+  function close() {
+    btn.classList.remove('open');
+    links.classList.remove('open');
+    btn.setAttribute('aria-expanded', 'false');
+  }
+
+  btn.addEventListener('click', e => {
+    e.stopPropagation();
+    const opening = btn.classList.toggle('open');
+    links.classList.toggle('open', opening);
+    btn.setAttribute('aria-expanded', String(opening));
+  });
+
+  // Close when a link is clicked
+  links.querySelectorAll('.nav-link').forEach(a => {
+    a.addEventListener('click', close);
+  });
+
+  // Close on outside click
+  document.addEventListener('click', e => {
+    if (!btn.contains(e.target) && !links.contains(e.target)) close();
+  });
+
+  // Close on resize back to desktop
+  window.addEventListener('resize', () => {
+    if (window.innerWidth > 768) close();
+  }, { passive: true });
+}
+
 
 // ─── LOADING SCREEN ──────────────────────────────────────────
 function initLoadingScreen() {
