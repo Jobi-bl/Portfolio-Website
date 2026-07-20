@@ -190,6 +190,12 @@ function initThemeSwitcher() {
       toggleBtn.classList.remove('active');
       toggleBtn.setAttribute('aria-expanded', 'false');
       panel.setAttribute('aria-hidden', 'true');
+      
+      if (theme === 'crash') {
+        playCrashSequence();
+        return;
+      }
+      
       if (current === theme) return;
       // Play glitch, then switch at 50% through
       playThemeGlitch(theme, () => {
@@ -1075,6 +1081,104 @@ function glitchCat(ctx, k, W, H) {
   for (let i = 0; i < np; i++) {
     ctx.fillText(PAWS[Math.floor(Math.random() * PAWS.length)],
       Math.random() * W, Math.random() * H);
+  }
+}
+
+// ─── CRASH SEQUENCE (404 THEME PRANK) ────────────────────────
+function playCrashSequence() {
+  const overlay = document.getElementById('crash-overlay');
+  const textContainer = document.getElementById('crash-text');
+  if (!overlay || !textContainer) return;
+
+  // 1. Trigger the visual shake and show overlay
+  document.body.classList.add('crash-shake');
+  overlay.classList.add('active');
+  textContainer.innerHTML = '';
+  
+  let panicText = '';
+  const logLines = [
+    "[13.3337] KERNEL PANIC - NOT SYNCING: FATAL EXCEPTION",
+    "[13.3338] Fixing recursive fault but reboot is needed!",
+    "[13.3340] CPU: 0 PID: 1 Comm: systemd Not tainted 5.15.0-soc-sec",
+    "[13.3341] Hardware name: PortfolioOS / SecurityCore",
+    "[13.3342] RIP: 0010:unauthorized_access+0x0/0x60",
+    "[13.3345] Code: 00 00 00 00 48 89 f8 48 89 e5 e8 23 44 55 66",
+    "[13.3348] CR2: 0000000000000000",
+    "[13.3350] ---[ end trace 7331b00b ]---",
+    "",
+    "CRITICAL ALERT: UNAUTHORIZED ACCESS DETECTED",
+    "BYPASSING FIREWALL... [FAILED]",
+    "ESCALATING PRIVILEGES... [FAILED]",
+    "INITIATING DATA ENCRYPTION...",
+  ];
+
+  // 2. Print kernel panic logs rapidly
+  let currentLine = 0;
+  const panicInterval = setInterval(() => {
+    if (currentLine < logLines.length) {
+      panicText += logLines[currentLine] + "\\n";
+      textContainer.innerHTML = panicText;
+      currentLine++;
+    } else {
+      clearInterval(panicInterval);
+      showSkull();
+    }
+  }, 100);
+
+  // 3. Show Hacker Skull
+  function showSkull() {
+    const skull = `
+<span class="crash-red">
+         .                                                      .
+        .n                   .                 .                  n.
+  .   .dP                  dP                   9b                 9b.    .
+ 4    qXb         .       dX                     Xb       .        dXp     t
+dX.    9Xb      .dXb    __                         __    dXb.     dXP     .Xb
+9XXb._       _.dXXXXb dXXXXbo.                 .odXXXXb dXXXXb._       _.dXXP
+ 9XXXXXXXXXXXXXXXXXXXVXXXXXXXXOo.           .oOXXXXXXXXVXXXXXXXXXXXXXXXXXXXP
+  \`9XXXXXXXXXXXXXXXXXXXXX'~   ~\`OOO8b   d8OOO'~   ~\`XXXXXXXXXXXXXXXXXXXXXP'
+    \`9XXXXXXXXXXXP' \`9XX'   DIE    \`98v8P'  HUMAN   \`XXP' \`9XXXXXXXXXXXP'
+        ~~~~~~~       9X.          .db|db.          .XP       ~~~~~~~
+                        )b.  .dbo.dP'\`v'\`9b.odb.  .dX(
+                      ,dXXXXXXXXXXXb     dXXXXXXXXXXXb.
+                     dXXXXXXXXXXXP'   .   \`9XXXXXXXXXXXb
+                    dXXXXXXXXXXXXb   d|b   dXXXXXXXXXXXXb
+                    9XXb'   \`XXXXXb.dX|Xb.dXXXXX'   \`dXXP
+                     \`'      9XXXXXX(   )XXXXXXP      \`'
+                              XXXX X.\`v'.X XXXX
+                              XP^X'\`b   d'\`X^XX
+                              X. 9  \`   '  P )X
+                              \`b  \`       '  d'
+                               \`             '
+</span>
+
+SYSTEM COMPROMISED. DEPLOYING RANSOMWARE...
+`;
+    textContainer.innerHTML = panicText + skull;
+    
+    // 4. SOC Analyst intercepts
+    setTimeout(socIntercept, 2000);
+  }
+
+  // 5. SOC Analyst typing effect
+  function socIntercept() {
+    document.body.classList.remove('crash-shake');
+    const interceptMsg = "\\n\\n[SOC_ANALYST_JOBI_BL]: Intrusion detected. Isolating host...\\n[SOC_ANALYST_JOBI_BL]: Applying emergency firewall rules...\\n[SOC_ANALYST_JOBI_BL]: Malware contained. Reversing encryption...\\n[SOC_ANALYST_JOBI_BL]: SYSTEM RESTORED. Nice try! 😉\\n";
+    
+    let i = 0;
+    const typeInterval = setInterval(() => {
+      textContainer.innerHTML += interceptMsg.charAt(i);
+      i++;
+      if (i >= interceptMsg.length) {
+        clearInterval(typeInterval);
+        setTimeout(recoverSystem, 1500);
+      }
+    }, 40);
+  }
+
+  // 6. Recover
+  function recoverSystem() {
+    overlay.classList.remove('active');
   }
 }
 
