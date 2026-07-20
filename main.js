@@ -589,6 +589,8 @@ document.addEventListener('DOMContentLoaded', () => {
   initBootSequence();
   initScrollProgress();
   initUptimeCounter();
+  initRandomHints();
+  if (isMobile()) initMobileNav();
   initThemeSwitcher();
   initActiveNav();
   initSkillBars();
@@ -718,6 +720,50 @@ function initScrollProgress() {
   }
   window.addEventListener('scroll', update, { passive: true });
   update();
+}
+
+function initRandomHints() {
+  const hints = [
+    "[psst.. try typing 'sudo']",
+    "[press ` for terminal]",
+    "[try 'crack-wifi' in terminal]",
+    "[hidden root access?]"
+  ];
+  
+  setInterval(() => {
+    // Only spawn a hint occasionally (30% chance every 8 seconds)
+    if (Math.random() > 0.3) return;
+    
+    const el = document.createElement('div');
+    el.textContent = hints[Math.floor(Math.random() * hints.length)];
+    el.style.position = 'fixed';
+    el.style.left = Math.random() * 80 + 10 + 'vw';
+    el.style.top = Math.random() * 80 + 10 + 'vh';
+    el.style.color = Math.random() > 0.5 ? 'var(--accent-red)' : 'var(--accent-green)';
+    el.style.fontSize = '0.65rem';
+    el.style.fontFamily = 'var(--font-mono)';
+    el.style.opacity = '0';
+    el.style.pointerEvents = 'none';
+    el.style.zIndex = '9999';
+    el.style.textShadow = '0 0 5px currentColor';
+    document.body.appendChild(el);
+    
+    // Glitchy blink animation
+    el.animate([
+      { opacity: 0 },
+      { opacity: 0.8, offset: 0.1 },
+      { opacity: 0, offset: 0.2 },
+      { opacity: 0.9, offset: 0.3 },
+      { opacity: 0, offset: 0.4 },
+      { opacity: 0.5, offset: 0.5 },
+      { opacity: 0, offset: 1 }
+    ], {
+      duration: 2500,
+      easing: 'linear'
+    });
+    
+    setTimeout(() => el.remove(), 2600);
+  }, 8000);
 }
 
 // ─── HIDDEN TERMINAL ─────────────────────────────────────────
