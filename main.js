@@ -764,7 +764,8 @@ LinkedIn: linkedin.com/in/jobi-b-l\n`,
 -rw-r--r--  Cybersecurity Analyst Job Simulation       Tata/Forage       Feb 2026
 -rw-r--r--  Certified IT Infrastructure & SOC Analyst  RedTeam HA        Jun 2026
 -rwxr--r--  Certified LLM Security Professional        Red Team Leaders  Jul 2026
--rwxr--r--  CICSA v3                                   RedTeam HA        Jul 2026\n`,
+-rwxr--r--  CICSA v3                                   RedTeam HA        Jul 2026
+-rw-r--r--  Cyber Job Simulation                       Deloitte/Forage   Jul 2026\n`,
 
     'ls skills': () =>
 `\n── Defensive ──────────────────────────────────
