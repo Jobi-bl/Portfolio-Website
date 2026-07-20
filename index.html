@@ -29,6 +29,11 @@
     </div>
   </div>
 
+  <!-- ─── CRASH OVERLAY ─── -->
+  <div id="crash-overlay" aria-hidden="true">
+    <div class="crash-text" id="crash-text"></div>
+  </div>
+
   <!-- ─── SCROLL PROGRESS ─── -->
   <div id="scroll-progress" aria-hidden="true"></div>
 
@@ -56,8 +61,14 @@
         <span class="theme-opt-label">CAT</span>
         <span class="theme-opt-sub">Catppuccin mocha</span>
       </button>
+      <button class="theme-option" id="theme-crash" role="option" aria-selected="false" data-theme="crash">
+        <span class="theme-opt-icon" style="color:#ff003c;">☠</span>
+        <span class="theme-opt-label" style="color:#ff003c;">404</span>
+        <span class="theme-opt-sub" style="color:#ff003c;">Crash system</span>
+      </button>
     </div>
     <button id="theme-toggle-btn" class="theme-toggle-btn" aria-haspopup="listbox" aria-expanded="false" title="Switch theme">
+
       <span class="theme-btn-icon" id="theme-btn-icon">◈</span>
       <span class="theme-btn-label" id="theme-btn-label">THEME</span>
       <span class="theme-btn-arrow" id="theme-btn-arrow">▲</span>
