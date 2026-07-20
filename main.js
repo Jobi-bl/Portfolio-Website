@@ -598,7 +598,6 @@ document.addEventListener('DOMContentLoaded', () => {
   initContactForm();
   initSmoothScroll();
   initNavScroll();
-  initMobileNav();        // ← hamburger menu
   initCardGlitch();
   initSectionReveal();
   initClickRipple();
