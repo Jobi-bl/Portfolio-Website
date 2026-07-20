@@ -1797,28 +1797,233 @@ body[data-theme="mono"] .cert-verify-link:hover { color: #cccccc; }
 }
 
 /* ═══════════════════════════════════════════
-   18. RESPONSIVE
+   18. RESPONSIVE — FULL SYSTEM
    ═══════════════════════════════════════════ */
-@media (max-width: 900px) {
-  .whoami-grid { grid-template-columns: 1fr; }
-  .projects-grid { grid-template-columns: 1fr; }
-  .skills-grid { grid-template-columns: 1fr; }
-  .contact-grid { grid-template-columns: 1fr; }
-  .whoami-card { grid-column: 1; }
-  .nav-links { gap: 0; }
-  .nav-link { padding: 4px 8px; font-size: 0.72rem; }
+
+/* ── Hamburger button (hidden on desktop) ── */
+.nav-hamburger {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  width: 36px;
+  height: 36px;
+  padding: 4px;
+  background: none;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  z-index: 200;
+  flex-shrink: 0;
+}
+.nav-hamburger span {
+  display: block;
+  height: 2px;
+  background: var(--text);
+  border-radius: 2px;
+  transition: transform var(--t-normal) ease, opacity var(--t-fast) ease;
+}
+.nav-hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.nav-hamburger.open span:nth-child(2) { opacity: 0; }
+.nav-hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+/* ── Tablet Landscape: 1100px ── */
+@media (max-width: 1100px) {
+  :root { --container: 96vw; }
+  .hero-name { font-size: clamp(2.8rem, 6vw, 4.5rem); }
+  .whoami-grid  { grid-template-columns: 1fr; }
+  .projects-grid { grid-template-columns: repeat(2, 1fr); }
+  .certs-grid   { grid-template-columns: repeat(2, 1fr); }
 }
 
-@media (max-width: 600px) {
-  :root { --space-xl: 1.25rem; --space-3xl: 3rem; }
-  .nav { padding: 0 var(--space-md); }
-  .nav-brand { display: none; }
-  .nav-status { display: none; }
-  .hero-content { padding: 0 var(--space-sm); }
-  .hero-name { font-size: 2.2rem; }
-  .network-graph { opacity: 0.07; }
-  .section::before { display: none; }
+/* ── Tablet: 900px ── */
+@media (max-width: 900px) {
+  :root { --space-3xl: 4rem; --space-2xl: 3rem; }
+  .whoami-grid   { grid-template-columns: 1fr; }
+  .projects-grid { grid-template-columns: 1fr; }
+  .skills-grid   { grid-template-columns: 1fr; }
+  .contact-grid  { grid-template-columns: 1fr; }
+  .whoami-card   { grid-column: 1; }
+  .certs-grid    { grid-template-columns: repeat(2, 1fr); }
+  .nav-links { gap: 0; }
+  .nav-link { padding: 4px 8px; font-size: 0.72rem; }
+  /* Terminal: wider on tablet */
+  #hterm { width: min(620px, 94vw); }
 }
+
+/* ── Mobile: 768px ── */
+@media (max-width: 768px) {
+  :root {
+    --nav-h: 56px;
+    --space-xl: 1.5rem;
+    --space-3xl: 3.5rem;
+  }
+
+  /* Nav: hamburger layout */
+  .nav {
+    flex-wrap: wrap;
+    padding: 0 var(--space-md);
+    position: relative;
+  }
+  .nav-hamburger { display: flex; }
+  .nav-status    { display: none; }
+
+  .nav-links {
+    display: none;
+    flex-direction: column;
+    position: absolute;
+    top: var(--nav-h);
+    left: 0; right: 0;
+    background: var(--bg-surface);
+    border-bottom: 1px solid var(--border);
+    padding: var(--space-sm) 0;
+    z-index: 150;
+    gap: 0;
+  }
+  .nav-links.open {
+    display: flex;
+  }
+  .nav-links li { width: 100%; }
+  .nav-link {
+    display: block;
+    width: 100%;
+    padding: 12px var(--space-lg);
+    font-size: 0.85rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-link:last-child { border-bottom: none; }
+
+  /* Hero */
+  .hero-content { padding: 0 var(--space-md); text-align: center; }
+  .hero-name    { font-size: clamp(2rem, 10vw, 3.2rem); }
+  .hero-title   { font-size: 0.85rem; flex-wrap: wrap; justify-content: center; }
+  .hero-badges  { justify-content: center; flex-wrap: wrap; gap: 6px; }
+  .hero-actions { flex-direction: column; align-items: center; gap: var(--space-sm); }
+  .hero-actions .btn { width: 100%; max-width: 300px; text-align: center; justify-content: center; }
+  .hero-system-info { font-size: 0.6rem; flex-wrap: wrap; justify-content: center; gap: 4px; }
+  .hero-system-info .sep { display: none; }
+  .network-graph { opacity: 0.05; }
+
+  /* Cards: full width */
+  .certs-grid { grid-template-columns: 1fr; }
+  .card { padding: var(--space-md); }
+
+  /* Skill bars */
+  .skill-section-title { font-size: 0.65rem; }
+
+  /* Theme switcher */
+  .theme-switcher { bottom: var(--space-md); right: var(--space-md); }
+  .theme-panel { font-size: 0.75rem; }
+  .theme-opt-label { font-size: 0.7rem; }
+
+  /* Terminal */
+  #hterm {
+    width: 100vw;
+    left: 0; right: 0;
+    bottom: 0;
+    transform: none;
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+    border-bottom: none;
+    max-height: 60vh;
+  }
+  #hterm.open {
+    display: flex;
+    animation: hterm-in-mobile 0.2s ease-out;
+  }
+  @keyframes hterm-in-mobile {
+    from { transform: translateY(20px); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
+  }
+  .hterm-kbd-hint { display: none; }
+
+  /* Loading screen */
+  .ls-inner { padding: 1.5rem; }
+  .ls-brand { font-size: 0.75rem; }
+  .ls-log   { font-size: 0.62rem; min-height: 220px; }
+
+  /* BSOD/crash overlay */
+  .grav-error { font-size: 0.65rem; }
+
+  /* Contact form */
+  .contact-form input, .contact-form textarea {
+    font-size: 0.85rem;
+    padding: 10px 12px;
+  }
+
+  /* Scroll progress */
+  #scroll-progress { height: 3px; }
+}
+
+/* ── Small Mobile: 480px ── */
+@media (max-width: 480px) {
+  :root {
+    --space-xl:  1rem;
+    --space-2xl: 2rem;
+    --space-3xl: 2.5rem;
+  }
+  html { font-size: 15px; }
+
+  .nav-brand { font-size: 0.7rem; }
+  .hero-name { font-size: clamp(1.8rem, 12vw, 2.6rem); }
+  .section-title { font-size: 1.1rem; }
+  .hero-pre-text { font-size: 0.65rem; }
+  .hero-tagline  { font-size: 0.75rem; }
+  .badge { font-size: 0.55rem; padding: 3px 8px; }
+  .btn   { font-size: 0.72rem; padding: 8px 16px; }
+
+  .project-card { padding: var(--space-md); }
+  .cert-card    { padding: var(--space-md); }
+
+  /* Stack exp entries */
+  .exp-header { flex-direction: column; gap: 4px; }
+  .exp-date   { font-size: 0.6rem; }
+
+  /* Reduce hero top padding */
+  .hero { min-height: 100svh; }
+
+  /* theme-panel left overflow fix */
+  .theme-switcher { right: 8px; bottom: 8px; }
+  .theme-panel { max-height: 70vh; overflow-y: auto; }
+}
+
+/* ── Large screens / TV: 1440px+ ── */
+@media (min-width: 1440px) {
+  :root { --container: 1280px; }
+  html  { font-size: 18px; }
+  .hero-name  { font-size: 5.5rem; }
+  .projects-grid { grid-template-columns: repeat(3, 1fr); }
+  .certs-grid    { grid-template-columns: repeat(3, 1fr); }
+  .skills-grid   { grid-template-columns: repeat(3, 1fr); }
+}
+
+/* ── Ultra-wide: 1920px+ ── */
+@media (min-width: 1920px) {
+  :root { --container: 1440px; }
+  html  { font-size: 19px; }
+}
+
+/* ── Reduced Motion: disable all heavy animations ── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  #matrix-canvas, #terminal-bg, .ghost-cat,
+  .net-ping, .blink-cursor { display: none !important; }
+  .hero-name { opacity: 1 !important; }
+}
+
+/* ── Performance hints ── */
+.nav, .hero-content, .card, .project-card, .cert-card {
+  will-change: auto;
+  contain: layout style;
+}
+#hterm { will-change: transform; }
+#scroll-progress { will-change: width; }
+
 
 /* ═══════════════════════════════════════════
    19. FOCUS STYLES (Accessibility)
