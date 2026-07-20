@@ -2072,3 +2072,49 @@ body[data-theme="cat"] .hterm-prompt-label { color: #f38ba8; }
 body[data-theme="cat"] .hterm-input { caret-color: #f38ba8; }
 body[data-theme="cat"] .hterm-out-ok { color: #a6e3a1; }
 
+/* ═══════════════════════════════════════════
+   CRASH OVERLAY (404 THEME)
+   ═══════════════════════════════════════════ */
+#crash-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 999999;
+  background: #000;
+  color: #0f0;
+  font-family: 'Courier Prime', 'JetBrains Mono', monospace;
+  padding: 2rem;
+  overflow: hidden;
+  display: none;
+  flex-direction: column;
+}
+#crash-overlay.active {
+  display: flex;
+}
+.crash-text {
+  white-space: pre-wrap;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  text-shadow: 0 0 5px #0f0;
+}
+.crash-red {
+  color: #ff003c;
+  text-shadow: 0 0 8px #ff003c;
+  font-weight: bold;
+}
+.crash-shake {
+  animation: crash-shake 0.4s infinite;
+}
+@keyframes crash-shake {
+  0% { transform: translate(1px, 1px) rotate(0deg); }
+  10% { transform: translate(-1px, -2px) rotate(-1deg); }
+  20% { transform: translate(-3px, 0px) rotate(1deg); }
+  30% { transform: translate(3px, 2px) rotate(0deg); }
+  40% { transform: translate(1px, -1px) rotate(1deg); }
+  50% { transform: translate(-1px, 2px) rotate(-1deg); }
+  60% { transform: translate(-3px, 1px) rotate(0deg); }
+  70% { transform: translate(3px, 1px) rotate(-1deg); }
+  80% { transform: translate(-1px, -1px) rotate(1deg); }
+  90% { transform: translate(1px, 2px) rotate(0deg); }
+  100% { transform: translate(1px, -2px) rotate(-1deg); }
+}
+
