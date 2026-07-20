@@ -1152,13 +1152,24 @@ function playCrashSequence() {
 
     if (idx >= allChars.length) {
       clearInterval(corruptInterval);
-      setTimeout(recoverAll, 800); // hold corrupted state briefly
+      // Show pitch-black for 2s, then recover
+      const blackout = document.createElement('div');
+      Object.assign(blackout.style, {
+        position: 'fixed', inset: '0', zIndex: '999999',
+        background: '#000', pointerEvents: 'none',
+      });
+      document.body.appendChild(blackout);
+      setTimeout(recoverAll, 2000);
     }
   }, 18); // ~55fps
 
   // ── 4. Recover — restore all original text ──
   function recoverAll() {
     document.body.classList.remove('crash-glitch');
+
+    // Remove blackout
+    const blackout = document.querySelector('div[style*="999999"]');
+    if (blackout) blackout.remove();
 
     // White flash like a reboot
     const flash = document.createElement('div');
