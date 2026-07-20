@@ -1084,102 +1084,67 @@ function glitchCat(ctx, k, W, H) {
   }
 }
 
-// ─── CRASH SEQUENCE (404 THEME PRANK) ────────────────────────
+// ─── CRASH SEQUENCE (BSOD PRANK) ────────────────────────
 function playCrashSequence() {
   const overlay = document.getElementById('crash-overlay');
-  const textContainer = document.getElementById('crash-text');
-  if (!overlay || !textContainer) return;
+  if (!overlay) return;
 
-  // 1. Trigger the visual shake and show overlay
-  document.body.classList.add('crash-shake');
+  // Render BSOD HTML
+  overlay.innerHTML = `
+    <div class="bsod-face">:(</div>
+    <div class="bsod-text">
+      Your PC ran into a problem and needs to restart. We're<br>
+      just collecting some error info, and then we'll restart for<br>
+      you.
+    </div>
+    <div class="bsod-text" style="font-size: 1.5rem;" id="bsod-progress">
+      0% complete
+    </div>
+    <div class="bsod-details">
+      <div class="bsod-qr">
+        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <path d="M0,0 h30 v30 h-30 z M10,10 h10 v10 h-10 z" fill="#0078D7"/>
+          <path d="M70,0 h30 v30 h-30 z M80,10 h10 v10 h-10 z" fill="#0078D7"/>
+          <path d="M0,70 h30 v30 h-30 z M10,80 h10 v10 h-10 z" fill="#0078D7"/>
+          <path d="M40,0 h20 v10 h-20 z M50,20 h20 v10 h-20 z M40,40 h60 v10 h-60 z M0,40 h30 v10 h-30 z M40,60 h10 v40 h-10 z M60,60 h10 v10 h-10 z M80,60 h20 v40 h-20 z M60,80 h10 v20 h-10 z" fill="#0078D7"/>
+        </svg>
+      </div>
+      <div class="bsod-info">
+        For more information about this issue and possible fixes, visit<br>
+        https://www.windows.com/stopcode<br><br>
+        <span>If you call a support person, give them this info:<br>
+        Stop code: CRITICAL_PORTFOLIO_OVERLOAD</span>
+      </div>
+    </div>
+  `;
+
+  // Show it
   overlay.classList.add('active');
-  textContainer.innerHTML = '';
   
-  let panicText = '';
-  const logLines = [
-    "[13.3337] KERNEL PANIC - NOT SYNCING: FATAL EXCEPTION",
-    "[13.3338] Fixing recursive fault but reboot is needed!",
-    "[13.3340] CPU: 0 PID: 1 Comm: systemd Not tainted 5.15.0-soc-sec",
-    "[13.3341] Hardware name: PortfolioOS / SecurityCore",
-    "[13.3342] RIP: 0010:unauthorized_access+0x0/0x60",
-    "[13.3345] Code: 00 00 00 00 48 89 f8 48 89 e5 e8 23 44 55 66",
-    "[13.3348] CR2: 0000000000000000",
-    "[13.3350] ---[ end trace 7331b00b ]---",
-    "",
-    "CRITICAL ALERT: UNAUTHORIZED ACCESS DETECTED",
-    "BYPASSING FIREWALL... [FAILED]",
-    "ESCALATING PRIVILEGES... [FAILED]",
-    "INITIATING DATA ENCRYPTION...",
-  ];
-
-  // 2. Print kernel panic logs rapidly
-  let currentLine = 0;
-  const panicInterval = setInterval(() => {
-    if (currentLine < logLines.length) {
-      panicText += logLines[currentLine] + "\\n";
-      textContainer.innerHTML = panicText;
-      currentLine++;
+  // Fake progress counter
+  const progEl = document.getElementById('bsod-progress');
+  let pct = 0;
+  
+  const interval = setInterval(() => {
+    pct += Math.floor(Math.random() * 25) + 5;
+    if (pct >= 100) {
+      pct = 100;
+      clearInterval(interval);
+      progEl.textContent = '100% complete';
+      
+      // Black screen flash like a reboot
+      setTimeout(() => {
+        overlay.style.background = '#000';
+        overlay.innerHTML = '';
+        setTimeout(() => {
+          overlay.classList.remove('active');
+          overlay.style.background = '#0078D7'; // reset for next time
+        }, 1200);
+      }, 500);
     } else {
-      clearInterval(panicInterval);
-      showSkull();
+      progEl.textContent = pct + '% complete';
     }
-  }, 100);
-
-  // 3. Show Hacker Skull
-  function showSkull() {
-    const skull = `
-<span class="crash-red">
-         .                                                      .
-        .n                   .                 .                  n.
-  .   .dP                  dP                   9b                 9b.    .
- 4    qXb         .       dX                     Xb       .        dXp     t
-dX.    9Xb      .dXb    __                         __    dXb.     dXP     .Xb
-9XXb._       _.dXXXXb dXXXXbo.                 .odXXXXb dXXXXb._       _.dXXP
- 9XXXXXXXXXXXXXXXXXXXVXXXXXXXXOo.           .oOXXXXXXXXVXXXXXXXXXXXXXXXXXXXP
-  \`9XXXXXXXXXXXXXXXXXXXXX'~   ~\`OOO8b   d8OOO'~   ~\`XXXXXXXXXXXXXXXXXXXXXP'
-    \`9XXXXXXXXXXXP' \`9XX'   DIE    \`98v8P'  HUMAN   \`XXP' \`9XXXXXXXXXXXP'
-        ~~~~~~~       9X.          .db|db.          .XP       ~~~~~~~
-                        )b.  .dbo.dP'\`v'\`9b.odb.  .dX(
-                      ,dXXXXXXXXXXXb     dXXXXXXXXXXXb.
-                     dXXXXXXXXXXXP'   .   \`9XXXXXXXXXXXb
-                    dXXXXXXXXXXXXb   d|b   dXXXXXXXXXXXXb
-                    9XXb'   \`XXXXXb.dX|Xb.dXXXXX'   \`dXXP
-                     \`'      9XXXXXX(   )XXXXXXP      \`'
-                              XXXX X.\`v'.X XXXX
-                              XP^X'\`b   d'\`X^XX
-                              X. 9  \`   '  P )X
-                              \`b  \`       '  d'
-                               \`             '
-</span>
-
-SYSTEM COMPROMISED. DEPLOYING RANSOMWARE...
-`;
-    textContainer.innerHTML = panicText + skull;
-    
-    // 4. SOC Analyst intercepts
-    setTimeout(socIntercept, 2000);
-  }
-
-  // 5. SOC Analyst typing effect
-  function socIntercept() {
-    document.body.classList.remove('crash-shake');
-    const interceptMsg = "\\n\\n[SOC_ANALYST_JOBI_BL]: Intrusion detected. Isolating host...\\n[SOC_ANALYST_JOBI_BL]: Applying emergency firewall rules...\\n[SOC_ANALYST_JOBI_BL]: Malware contained. Reversing encryption...\\n[SOC_ANALYST_JOBI_BL]: SYSTEM RESTORED. Nice try! 😉\\n";
-    
-    let i = 0;
-    const typeInterval = setInterval(() => {
-      textContainer.innerHTML += interceptMsg.charAt(i);
-      i++;
-      if (i >= interceptMsg.length) {
-        clearInterval(typeInterval);
-        setTimeout(recoverSystem, 1500);
-      }
-    }, 40);
-  }
-
-  // 6. Recover
-  function recoverSystem() {
-    overlay.classList.remove('active');
-  }
+  }, 800);
 }
 
 // ─── CLICK RIPPLE — VIRUS BURST ──────────────────────────────
