@@ -765,6 +765,7 @@ function initHiddenTerminal() {
   date            current date/time
   ping [target]   ping a target
   ssh soc-lab     connect to home lab
+  crack-wifi      simulate WPA2 crack
   sudo [cmd]      try your luck
   history         command history
   clear           clear terminal
@@ -912,7 +913,7 @@ Type 'help' for available commands. Press \` to toggle.\n${'─'.repeat(50)}\n`;
     out.appendChild(w);
   }
 
-  function runCmd(raw) {
+  async function runCmd(raw) {
     const t = raw.trim();
     if (!t) return;
     if (cmdHistory[cmdHistory.length - 1] !== t) cmdHistory.push(t);
@@ -936,6 +937,29 @@ Type 'help' for available commands. Press \` to toggle.\n${'─'.repeat(50)}\n`;
       } else {
         print(t, `\n[sudo] password for jobi: ****\njobi is not in the sudoers file. This incident will be reported.\n`, true);
       }
+      return;
+    }
+
+    // crack-wifi mini-game
+    if (base === 'crack-wifi') {
+      print(t, '\nInitializing aircrack-ng v1.7...', false);
+      inp.disabled = true;
+      await sleep(500);
+      print(null, 'Reading packets from WPA handshakes...', false);
+      await sleep(800);
+      print(null, 'Target BSSID: 00:14:22:01:23:45 (CORP_SECURE)', false);
+      await sleep(600);
+      print(null, 'Starting dictionary attack with rockyou.txt...\n', false);
+      
+      for(let i=0; i<6; i++) {
+        await sleep(300);
+        print(null, `Testing key: ${Math.random().toString(36).substring(2,10)}... Failed`, false);
+      }
+      await sleep(800);
+      print(null, '\n[!] KEY FOUND! [ HIRE_ME_2026 ]', false);
+      print(null, 'Decrypted successfully.\n', false);
+      inp.disabled = false;
+      inp.focus();
       return;
     }
 
@@ -996,6 +1020,25 @@ Type 'help' for available commands. Press \` to toggle.\n${'─'.repeat(50)}\n`;
       if (opening) { welcome(); inp.focus(); }
     }
     if (e.key === 'Escape' && term.classList.contains('open')) closeTerm();
+  });
+
+  // ── Global Keyboard Easter Egg ──
+  let keySequence = '';
+  document.addEventListener('keydown', e => {
+    if (e.target.matches('input,textarea,[contenteditable]')) return;
+    keySequence += e.key.toLowerCase();
+    if (keySequence.length > 15) keySequence = keySequence.slice(-15);
+    
+    // Type 'sudo' anywhere on the page
+    if (keySequence.endsWith('sudo')) {
+      keySequence = '';
+      showToast('[ADMIN MODE UNLOCKED] — Root access granted.', 'granted');
+      document.body.style.transition = 'filter 0.5s ease';
+      document.body.style.filter = 'hue-rotate(140deg) saturate(1.5)';
+      setTimeout(() => {
+        document.body.style.filter = '';
+      }, 3500);
+    }
   });
 
   // ── Drag ──
