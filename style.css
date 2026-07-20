@@ -1860,11 +1860,9 @@ body[data-theme="mono"] .cert-verify-link:hover { color: #cccccc; }
 
   /* Nav: hamburger layout */
   .nav {
-    flex-wrap: wrap;
-    padding: 0 var(--space-md);
-    position: relative;
+    padding: 0 var(--space-lg);
   }
-  .nav-hamburger { display: flex; }
+  .nav-hamburger { display: flex; margin-left: auto; }
   .nav-status    { display: none; }
 
   .nav-links {
