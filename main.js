@@ -350,17 +350,41 @@ function initContactForm() {
       return;
     }
 
-    // Simulate sending
+    // Animate button
     if (btnText) btnText.textContent = '$ ./send --encrypting...';
-    await sleep(1200);
-    if (btnText) btnText.textContent = '$ ./send --transmitting...';
     await sleep(800);
+    if (btnText) btnText.textContent = '$ ./send --transmitting...';
 
-    showToast('[ACCESS GRANTED] — Message transmitted successfully.', 'granted');
-    form.reset();
+    try {
+      const res = await fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({
+          access_key: 'a46b001d-00fd-493e-b232-af809abe2f88',
+          name:    $('#field-name')?.value.trim(),
+          email:   $('#field-email')?.value.trim(),
+          message: $('#field-msg')?.value.trim(),
+          subject: 'Portfolio Contact — New Message',
+          from_name: 'JOBI BL Portfolio',
+        }),
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        showToast('[ACCESS GRANTED] — Message transmitted successfully.', 'granted');
+        form.reset();
+      } else {
+        showToast('[TRANSMISSION ERROR] — Please try again.', 'denied');
+      }
+    } catch {
+      showToast('[NETWORK ERROR] — Check your connection.', 'denied');
+    }
+
     if (btnText) btnText.textContent = '$ ./send --encrypt';
   });
 }
+
 
 // ─── 11. SMOOTH SCROLL NAV LINKS ─────────────────────────────
 function initSmoothScroll() {
