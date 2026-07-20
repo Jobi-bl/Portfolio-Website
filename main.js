@@ -1084,65 +1084,93 @@ function glitchCat(ctx, k, W, H) {
   }
 }
 
-// ─── CRASH SEQUENCE — GRAVITY COLLAPSE ───────────────────────
+// ─── CRASH SEQUENCE — TEXT CORRUPTION VIRUS ──────────────────
 function playCrashSequence() {
-  const overlay = document.getElementById('crash-overlay');
-  if (!overlay) return;
+  if (document.body.classList.contains('crash-glitch')) return; // prevent double-fire
 
-  // Grab every meaningful page element to drop
-  const targets = [
-    ...document.querySelectorAll(
-      'nav, .hero-section, section, .card, .cert-card, .project-card, ' +
-      '.skill-bar-wrap, .exp-entry, footer, .theme-switcher, #hterm-kbd-hint'
-    )
-  ].filter(el => !el.closest('#crash-overlay') && !el.closest('#loading-screen'));
+  // Glitch characters pool
+  const CORRUPT = '█▓▒░▄▀■□▪▫◘◙◆◇○●◎✦✧⚡⊗⊕⊘⊙±×÷∞∅∆∇∏∑∫≈≠≡≤≥01#@$%&!?';
 
-  if (targets.length === 0) return;
+  // ── 1. Collect all text nodes (skip scripts / styles) ──
+  const textNodes = [];
+  const walker = document.createTreeWalker(
+    document.body,
+    NodeFilter.SHOW_TEXT,
+    {
+      acceptNode(node) {
+        const p = node.parentElement;
+        if (!p) return NodeFilter.FILTER_REJECT;
+        const tag = p.tagName;
+        if (['SCRIPT','STYLE','NOSCRIPT'].includes(tag)) return NodeFilter.FILTER_REJECT;
+        if (p.closest('#crash-overlay,#loading-screen,#hterm,#scroll-progress')) return NodeFilter.FILTER_REJECT;
+        if (!node.textContent.trim()) return NodeFilter.FILTER_REJECT;
+        return NodeFilter.FILTER_ACCEPT;
+      }
+    }
+  );
 
-  // ── 1. Apply random fall params to each element ──
-  targets.forEach((el, i) => {
-    const rot    = (Math.random() - 0.5) * 40;            // −20° to +20°
-    const rotEnd = rot + (Math.random() - 0.5) * 30;
-    const dur    = 600 + Math.random() * 500;              // 600–1100ms
-    const delay  = i * 28 + Math.random() * 60;           // staggered
+  while (walker.nextNode()) {
+    const node = walker.currentNode;
+    textNodes.push({ node, original: node.textContent });
+  }
 
-    el.style.setProperty('--fall-rot',     `${rot}deg`);
-    el.style.setProperty('--fall-rot-end', `${rotEnd}deg`);
-    el.style.setProperty('--fall-dur',     `${dur}ms`);
-    el.style.setProperty('--fall-delay',   `${delay}ms`);
-    el.style.setProperty('--fall-nudge',   `${(Math.random() - 0.5) * 16}px`);
-    el.classList.add('gravity-fall');
+  if (textNodes.length === 0) return;
+
+  // ── 2. Start page glitch ──
+  document.body.classList.add('crash-glitch');
+
+  // ── 3. Corruption spread — wave from top to bottom ──
+  // Build a flat list of all characters across all nodes
+  let allChars = [];
+  textNodes.forEach(({ node, original }, ni) => {
+    for (let ci = 0; ci < original.length; ci++) {
+      if (original[ci].trim()) allChars.push({ ni, ci });
+    }
   });
 
-  // ── 2. Show void overlay after longest fall finishes ──
-  const maxDelay = targets.length * 28 + 1200;
-  setTimeout(() => {
-    overlay.innerHTML = `
-      <div class="grav-error">FATAL_PORTFOLIO_COLLAPSE</div>
-      <div class="grav-code">
-        exception at 0x${Math.floor(Math.random()*0xFFFFFF).toString(16).toUpperCase().padStart(6,'0')}<br>
-        gravity override failed — all elements unrecoverable
-      </div>
-      <button class="grav-reboot-btn" id="grav-reboot">[ REBOOT SYSTEM ]</button>
-    `;
-    overlay.classList.add('active');
+  // Shuffle to spread randomly like a virus
+  for (let i = allChars.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [allChars[i], allChars[j]] = [allChars[j], allChars[i]];
+  }
 
-    // ── 3. Reboot — restore everything ──
-    document.getElementById('grav-reboot').addEventListener('click', () => {
-      overlay.classList.remove('active');
-      targets.forEach((el, i) => {
-        const delay = i * 30 + Math.random() * 40;
-        el.classList.remove('gravity-fall');
-        el.style.setProperty('--fall-delay', `${delay}ms`);
-        el.classList.add('gravity-restore');
-        el.addEventListener('animationend', () => {
-          el.classList.remove('gravity-restore');
-          el.style.removeProperty('--fall-delay');
-        }, { once: true });
-      });
+  // Build mutable char arrays for each node
+  const mutable = textNodes.map(({ original }) => original.split(''));
+
+  let idx = 0;
+  const batchSize = Math.max(1, Math.floor(allChars.length / 80)); // ~80 frames
+  const corruptInterval = setInterval(() => {
+    for (let b = 0; b < batchSize && idx < allChars.length; b++, idx++) {
+      const { ni, ci } = allChars[idx];
+      mutable[ni][ci] = CORRUPT[Math.floor(Math.random() * CORRUPT.length)];
+    }
+    // Re-render changed nodes
+    const changedNodes = new Set(allChars.slice(Math.max(0, idx - batchSize), idx).map(c => c.ni));
+    changedNodes.forEach(ni => {
+      textNodes[ni].node.textContent = mutable[ni].join('');
     });
-  }, maxDelay);
+
+    if (idx >= allChars.length) {
+      clearInterval(corruptInterval);
+      setTimeout(recoverAll, 800); // hold corrupted state briefly
+    }
+  }, 18); // ~55fps
+
+  // ── 4. Recover — restore all original text ──
+  function recoverAll() {
+    document.body.classList.remove('crash-glitch');
+
+    // White flash like a reboot
+    const flash = document.createElement('div');
+    flash.className = 'crash-recover-flash';
+    document.body.appendChild(flash);
+    setTimeout(() => flash.remove(), 500);
+
+    // Restore text nodes
+    textNodes.forEach(({ node, original }) => { node.textContent = original; });
+  }
 }
+
 
 
 // ─── CLICK RIPPLE — VIRUS BURST ──────────────────────────────
