@@ -153,6 +153,7 @@ const THEMES = {
   mono:    { label: 'MONO',    icon: '◈' },
   '8bit':  { label: '8-BIT',  icon: '▩' },
   cat:     { label: 'CAT',     icon: '🐱' },
+  nova:    { label: 'NOVA',   icon: '✦' },
 };
 
 function initThemeSwitcher() {
@@ -608,7 +609,192 @@ document.addEventListener('DOMContentLoaded', () => {
   if (!isTouch()) initPawTrail();      // paw trail only on pointer devices
   initCatButtonEffect();
   if (!isTouch()) initCatCursorFollower(); // cursor follower: desktop only
+  // ── Nova animations ──
+  initNovaEffects();
 });
+
+
+// ─── NOVA THEME — ACETERNITY-STYLE EFFECTS ───────────────────────────────────
+function initNovaEffects() {
+  let spotlightCleanup    = null;
+  let cipherCleanup       = null;
+  let auroraRAF           = null;
+  let auroraCanvas        = null;
+
+  // — helper: is nova theme active?
+  const isNova = () => document.body.getAttribute('data-theme') === 'nova';
+
+  // ── 1. CARD SPOTLIGHT — mouse-tracking radial glow ────────────────
+  function startSpotlight() {
+    stopSpotlight();
+    const handler = e => {
+      if (!isNova()) return;
+      const card = e.currentTarget;
+      const rect = card.getBoundingClientRect();
+      const x = ((e.clientX - rect.left) / rect.width  * 100).toFixed(1) + '%';
+      const y = ((e.clientY - rect.top)  / rect.height * 100).toFixed(1) + '%';
+      card.style.setProperty('--mx', x);
+      card.style.setProperty('--my', y);
+    };
+    const cards = $$('.card');
+    cards.forEach(c => c.addEventListener('mousemove', handler));
+    spotlightCleanup = () => cards.forEach(c => c.removeEventListener('mousemove', handler));
+  }
+
+  function stopSpotlight() {
+    if (spotlightCleanup) { spotlightCleanup(); spotlightCleanup = null; }
+  }
+
+  // ── 2. CIPHER SCRAMBLE — Evervault-style text scramble on hover ──
+  const CIPHER_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*<>?/';
+  const rand = n => Math.floor(Math.random() * n);
+
+  function scramble(el, originalText) {
+    let frame  = 0;
+    const len  = originalText.length;
+    const totalFrames = 18;
+    const raf  = { id: null };
+
+    function tick() {
+      frame++;
+      const progress = frame / totalFrames;
+      let result = '';
+      for (let i = 0; i < len; i++) {
+        if (originalText[i] === ' ') { result += ' '; continue; }
+        if (i / len < progress) {
+          result += originalText[i];
+        } else {
+          result += CIPHER_CHARS[rand(CIPHER_CHARS.length)];
+        }
+      }
+      el.textContent = result;
+      if (frame < totalFrames) {
+        raf.id = requestAnimationFrame(tick);
+      } else {
+        el.textContent = originalText;
+        el.classList.remove('cipher-active');
+      }
+    }
+    el.classList.add('cipher-active');
+    raf.id = requestAnimationFrame(tick);
+    return () => { cancelAnimationFrame(raf.id); el.textContent = originalText; el.classList.remove('cipher-active'); };
+  }
+
+  function startCipher() {
+    stopCipher();
+    const cleanups = [];
+    $$('.project-card').forEach(card => {
+      const title = card.querySelector('.proj-title');
+      if (!title) return;
+      const orig = title.textContent;
+      let cleanup = null;
+      const enter = () => { if (!isNova()) return; if (cleanup) cleanup(); cleanup = scramble(title, orig); };
+      const leave = () => { if (cleanup) { cleanup(); cleanup = null; } };
+      card.addEventListener('mouseenter', enter);
+      card.addEventListener('mouseleave', leave);
+      cleanups.push(() => { card.removeEventListener('mouseenter', enter); card.removeEventListener('mouseleave', leave); if (cleanup) cleanup(); });
+    });
+    cipherCleanup = () => cleanups.forEach(fn => fn());
+  }
+
+  function stopCipher() {
+    if (cipherCleanup) { cipherCleanup(); cipherCleanup = null; }
+  }
+
+  // ── 3. AURORA BEAM CANVAS — hero section animated beams ──────────
+  function startAurora() {
+    stopAurora();
+    const hero = document.getElementById('hero');
+    if (!hero) return;
+    auroraCanvas = document.createElement('canvas');
+    auroraCanvas.id = 'nova-aurora-canvas';
+    hero.insertBefore(auroraCanvas, hero.firstChild);
+
+    const ctx = auroraCanvas.getContext('2d');
+
+    const beams = Array.from({ length: 6 }, (_, i) => ({
+      x:      Math.random(),
+      y:      Math.random() * 0.6,
+      radius: 0.3 + Math.random() * 0.4,
+      speed:  0.0002 + Math.random() * 0.0003,
+      phase:  Math.random() * Math.PI * 2,
+      color:  i % 3 === 0 ? [129,140,248] : i % 3 === 1 ? [52,211,153] : [139,92,246],
+    }));
+
+    function resize() {
+      auroraCanvas.width  = hero.offsetWidth;
+      auroraCanvas.height = hero.offsetHeight;
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    let t = 0;
+    function draw() {
+      if (!isNova() || !auroraCanvas) return;
+      const W = auroraCanvas.width;
+      const H = auroraCanvas.height;
+      ctx.clearRect(0, 0, W, H);
+
+      beams.forEach(b => {
+        const cx = (b.x + Math.sin(t * b.speed + b.phase) * 0.15) * W;
+        const cy = (b.y + Math.cos(t * b.speed * 0.7 + b.phase) * 0.08) * H;
+        const r  = b.radius * W;
+        const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+        grad.addColorStop(0,   `rgba(${b.color.join(',')},0.18)`);
+        grad.addColorStop(0.4, `rgba(${b.color.join(',')},0.07)`);
+        grad.addColorStop(1,   `rgba(${b.color.join(',')},0)`);
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(cx, cy, r, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      t++;
+      auroraRAF = requestAnimationFrame(draw);
+    }
+    auroraRAF = requestAnimationFrame(draw);
+
+    // cleanup fn
+    auroraCanvas._cleanup = () => {
+      window.removeEventListener('resize', resize);
+    };
+  }
+
+  function stopAurora() {
+    if (auroraRAF) { cancelAnimationFrame(auroraRAF); auroraRAF = null; }
+    if (auroraCanvas) {
+      if (auroraCanvas._cleanup) auroraCanvas._cleanup();
+      auroraCanvas.remove();
+      auroraCanvas = null;
+    }
+  }
+
+  // ── Activate / deactivate on theme change ───────────────────────
+  function activate() {
+    startSpotlight();
+    startCipher();
+    startAurora();
+  }
+
+  function deactivate() {
+    stopSpotlight();
+    stopCipher();
+    stopAurora();
+  }
+
+  // Observe body attribute changes
+  const observer = new MutationObserver(() => {
+    if (isNova()) {
+      activate();
+    } else {
+      deactivate();
+    }
+  });
+  observer.observe(document.body, { attributes: true, attributeFilter: ['data-theme'] });
+
+  // If nova is already active on load
+  if (isNova()) activate();
+}
 
 // ─── MOBILE NAV — HAMBURGER ───────────────────────────────────
 function initMobileNav() {
