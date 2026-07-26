@@ -627,22 +627,38 @@ function initNovaEffects() {
   // ── 1. CARD SPOTLIGHT — mouse-tracking radial glow ────────────────
   function startSpotlight() {
     stopSpotlight();
-    const handler = e => {
-      if (!isNova()) return;
-      const card = e.currentTarget;
-      const rect = card.getBoundingClientRect();
-      const x = ((e.clientX - rect.left) / rect.width  * 100).toFixed(1) + '%';
-      const y = ((e.clientY - rect.top)  / rect.height * 100).toFixed(1) + '%';
-      card.style.setProperty('--mx', x);
-      card.style.setProperty('--my', y);
-    };
     const cards = $$('.card');
-    cards.forEach(c => c.addEventListener('mousemove', handler));
-    spotlightCleanup = () => cards.forEach(c => c.removeEventListener('mousemove', handler));
+    const cleanups = [];
+
+    cards.forEach(card => {
+      // Inject the spotlight overlay div
+      const spot = document.createElement('div');
+      spot.className = 'nova-spotlight';
+      card.insertBefore(spot, card.firstChild);
+
+      const moveHandler = e => {
+        if (!isNova()) return;
+        const rect = card.getBoundingClientRect();
+        const x = ((e.clientX - rect.left) / rect.width  * 100).toFixed(1) + '%';
+        const y = ((e.clientY - rect.top)  / rect.height * 100).toFixed(1) + '%';
+        spot.style.setProperty('--mx', x);
+        spot.style.setProperty('--my', y);
+      };
+
+      card.addEventListener('mousemove', moveHandler);
+      cleanups.push(() => {
+        card.removeEventListener('mousemove', moveHandler);
+        spot.remove();
+      });
+    });
+
+    spotlightCleanup = () => cleanups.forEach(fn => fn());
   }
 
   function stopSpotlight() {
     if (spotlightCleanup) { spotlightCleanup(); spotlightCleanup = null; }
+    // Safety: remove any lingering spotlight divs
+    $$('.nova-spotlight').forEach(el => el.remove());
   }
 
   // ── 2. CIPHER SCRAMBLE — Evervault-style text scramble on hover ──
