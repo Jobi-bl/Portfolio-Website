@@ -874,7 +874,10 @@ LinkedIn: linkedin.com/in/jobi-b-l\n`,
     └─ github.com/Jobi-bl/Phishing-email-detection-model
 
 04. Secure Login System
-    └─ github.com/Jobi-bl/Secure-login-system-\n`,
+    └─ github.com/Jobi-bl/Secure-login-system-
+
+05. File Encryption & Decryption Tool
+    └─ github.com/Jobi-bl/file-encryption-decryption-tool\n`,
 
     'cat about.txt': () =>
 `\nCybersecurity intern with hands-on project experience in
