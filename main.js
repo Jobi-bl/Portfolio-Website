@@ -861,27 +861,27 @@ LinkedIn: linkedin.com/in/jobi-b-l\n`,
   TryHackMe     HackTheBox      OverTheWire\n`,
 
     'ls projects': () =>
-`\n01. Python Vulnerability Scanner
-    ├─ Engineered during Thiranex internship (Jun–Jul 2026)
-    └─ Tests auth endpoints, SQLi, XSS attack vectors
+`\n01. Core Detection LAB — AD & Splunk SIEM
+    ├─ Stack: Splunk Enterprise · Sysmon · Active Directory · NetExec
+    └─ github.com/Jobi-bl/Core-Detectection-LAB-Active-Directory-and-Splunk
 
 02. Home SOC Lab
-    ├─ Stack: Wazuh + Kali Linux + Ubuntu VMs
-    └─ Real attack simulation & alert triage practice
+    ├─ Stack: Wazuh · Kali Linux · Ubuntu VMs
+    └─ 468 auth failure events correlated, 3 MITRE techniques mapped
 
-03. Phishing Email Detector
-    ├─ NLP + ML classification model
-    └─ github.com/Jobi-bl/Phishing-email-detection-model
+03. Password Strength Analyzer
+    ├─ Live entropy calculation + SHA-256 reuse detection
+    └─ github.com/Jobi-bl/password-strength-analyser
 
 04. Secure Login System
     └─ github.com/Jobi-bl/Secure-login-system-
 
-05. File Encryption & Decryption Tool
-    └─ github.com/Jobi-bl/file-encryption-decryption-tool
+05. ML Phishing Email Detector
+    ├─ NLP + ML classification model
+    └─ github.com/Jobi-bl/Phishing-email-detection-model
 
-06. Core Detection LAB — AD & Splunk SIEM
-    ├─ Stack: Splunk Enterprise · Sysmon · Active Directory · NetExec
-    └─ github.com/Jobi-bl/Core-Detectection-LAB-Active-Directory-and-Splunk\n`,
+06. File Encryption & Decryption Tool
+    └─ github.com/Jobi-bl/file-encryption-decryption-tool\n`,
 
     'cat about.txt': () =>
 `\nCybersecurity intern with hands-on project experience in
