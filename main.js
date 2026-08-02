@@ -1,4 +1,4 @@
-﻿/* ═══════════════════════════════════════════════════════════
+/* ═══════════════════════════════════════════════════════════
    JOBI BL — Cybersecurity Portfolio
    main.js: All interactions, animations, canvas effects
    ═══════════════════════════════════════════════════════════ */
@@ -877,7 +877,11 @@ LinkedIn: linkedin.com/in/jobi-b-l\n`,
     └─ github.com/Jobi-bl/Secure-login-system-
 
 05. File Encryption & Decryption Tool
-    └─ github.com/Jobi-bl/file-encryption-decryption-tool\n`,
+    └─ github.com/Jobi-bl/file-encryption-decryption-tool
+
+06. Core Detection LAB — AD & Splunk SIEM
+    ├─ Stack: Splunk Enterprise · Sysmon · Active Directory · NetExec
+    └─ github.com/Jobi-bl/Core-Detectection-LAB-Active-Directory-and-Splunk\n`,
 
     'cat about.txt': () =>
 `\nCybersecurity intern with hands-on project experience in
