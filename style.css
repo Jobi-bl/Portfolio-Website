@@ -1,4 +1,4 @@
-﻿/* ═══════════════════════════════════════════════════════════
+/* ═══════════════════════════════════════════════════════════
    JOBI BL — Cybersecurity Portfolio
    Design System: Retrofuturist Terminal Aesthetic
    ═══════════════════════════════════════════════════════════ */
@@ -1581,31 +1581,57 @@ body[data-theme="cat"] .theme-panel::before {
 
 .cert-perms { color: var(--text-faint); flex-shrink: 0; font-size: 0.7rem; padding-top: 2px; }
 
-.cert-info { flex: 1; }
+.cert-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
 
 .cert-main {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
+  justify-content: space-between;
   gap: var(--space-sm);
-  margin-bottom: 4px;
-  flex-wrap: wrap;
 }
 
-.cert-name { color: var(--text); font-weight: 500; }
+.cert-name { color: var(--text); font-weight: 500; flex: 1; }
 
 .cert-badge {
   font-size: 0.58rem;
   letter-spacing: 0.12em;
   padding: 2px 6px;
   border: 1px solid;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
-.cert-badge--verified { color: var(--accent-green); border-color: var(--accent-green); background: var(--accent-green-dim); }
-.cert-badge--complete { color: var(--text-dim); border-color: var(--static-grey); }
+/* VERIFIED — top-right: sits in .cert-main next to name */
+.cert-badge--verified {
+  color: var(--accent-green);
+  border-color: var(--accent-green);
+  background: var(--accent-green-dim);
+  align-self: flex-start;
+}
 
-.cert-meta { display: flex; gap: var(--space-md); flex-wrap: wrap; }
+/* COMPLETE — bottom-right: pushed down via wrapper */
+.cert-badge--complete {
+  color: var(--text-dim);
+  border-color: var(--static-grey);
+  align-self: flex-end;
+  margin-top: auto;
+}
+
+.cert-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+
 .cert-issuer { color: var(--text-dim); }
-.cert-date { color: var(--text-faint); }
+.cert-date   { color: var(--text-faint); }
 
 .cert-verify-link {
   display: inline-flex;
