@@ -84,31 +84,49 @@ async function initNameReveal() {
 
   const targetName = 'JOBI BL';
   const hackChars  = '!@#$%^&*0123456789ABCDEF';
-  const steps      = 14;
-  const delay      = 55;
 
-  // Phase 1: Show scrambled hacker text
-  hackEl.textContent = '';
-  for (let s = 0; s < steps; s++) {
-    await sleep(delay);
+  // Languages to flash through before resolving
+  const languages = [
+    { text: 'ジョビ BL',                            lang: 'ja' },  // Japanese
+    { text: '조비 BL',                               lang: 'ko' },  // Korean
+    { text: '乔比 BL',                               lang: 'zh' },  // Chinese
+    { text: 'ДЖОБИ БЛ',                             lang: 'ru' },  // Russian
+    { text: 'ΙΩΒΙ ΒΛ',                              lang: 'el' },  // Greek
+    { text: '\u{1D575}\u{1D594}\u{1D587}\u{1D58A} \u{1D571}\u{1D57F}', lang: 'de' },  // German Fraktur
+    { text: '\u062C\u0648\u0628\u064A \u0628\u0644', lang: 'ar' },  // Arabic
+    { text: '.--- --- -... .. / -... .-..',           lang: 'morse' }, // Morse
+  ];
+
+  // Phase 1: Flash through each language
+  realEl.textContent = '';
+  hackEl.style.opacity = '1';
+  for (const { text, lang } of languages) {
+    hackEl.textContent = text;
+    hackEl.setAttribute('lang', lang);
+    await sleep(310);
+  }
+  hackEl.removeAttribute('lang');
+
+  // Phase 2: Quick symbol scramble as transition
+  for (let s = 0; s < 7; s++) {
+    await sleep(48);
     hackEl.textContent = Array.from({ length: targetName.length }, () =>
       hackChars[Math.floor(Math.random() * hackChars.length)]
     ).join('');
   }
 
-  // Phase 2: Resolve character by character
+  // Phase 3: Resolve character by character
   let resolved = Array(targetName.length).fill(null);
   for (let i = 0; i < targetName.length; i++) {
-    await sleep(delay + 20);
+    await sleep(72);
     resolved[i] = targetName[i];
-    // Flash remaining chars
-    hackEl.textContent = resolved.map((c, idx) =>
+    hackEl.textContent = resolved.map((c) =>
       c !== null ? '' : hackChars[Math.floor(Math.random() * hackChars.length)]
     ).join('');
     realEl.textContent = resolved.filter(c => c !== null).join('');
   }
 
-  // Phase 3: Clear hack, show full real name
+  // Phase 4: Clean finish
   hackEl.textContent = '';
   realEl.textContent = targetName;
 
@@ -116,6 +134,7 @@ async function initNameReveal() {
   await sleep(300);
   initTypewriter();
 }
+
 
 // ─── 3. TYPEWRITER ───────────────────────────────────────────
 async function initTypewriter() {
