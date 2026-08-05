@@ -1605,20 +1605,21 @@ body[data-theme="cat"] .theme-panel::before {
   border: 1px solid;
   white-space: nowrap;
   flex-shrink: 0;
-  margin-left: auto;
 }
 
-/* VERIFIED lives in cert-main — top row */
+/* VERIFIED — in cert-main (top row), pushed to right */
 .cert-badge--verified {
   color: var(--accent-green);
   border-color: var(--accent-green);
   background: var(--accent-green-dim);
+  margin-left: auto;
 }
 
-/* COMPLETE lives in cert-meta — bottom row */
+/* COMPLETE — in cert-meta (bottom row), pushed to right */
 .cert-badge--complete {
   color: var(--text-dim);
   border-color: var(--static-grey);
+  margin-left: auto;
 }
 
 .cert-meta {
