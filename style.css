@@ -1589,16 +1589,13 @@ body[data-theme="cat"] .theme-panel::before {
 .cert-main {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: var(--space-sm);
   margin-bottom: 4px;
-  flex-wrap: wrap;
 }
 
 .cert-name {
   color: var(--text);
   font-weight: 500;
-  flex: 1;
 }
 
 .cert-badge {
@@ -1608,16 +1605,17 @@ body[data-theme="cat"] .theme-panel::before {
   border: 1px solid;
   white-space: nowrap;
   flex-shrink: 0;
+  margin-left: auto;
 }
 
-/* VERIFIED lives in cert-main — appears at the top */
+/* VERIFIED lives in cert-main — top row */
 .cert-badge--verified {
   color: var(--accent-green);
   border-color: var(--accent-green);
   background: var(--accent-green-dim);
 }
 
-/* COMPLETE lives in cert-meta — appears at the bottom */
+/* COMPLETE lives in cert-meta — bottom row */
 .cert-badge--complete {
   color: var(--text-dim);
   border-color: var(--static-grey);
@@ -1626,10 +1624,8 @@ body[data-theme="cat"] .theme-panel::before {
 .cert-meta {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: var(--space-md);
   flex-wrap: wrap;
-  gap: var(--space-sm);
-  margin-top: 2px;
 }
 
 .cert-issuer { color: var(--text-dim); }
