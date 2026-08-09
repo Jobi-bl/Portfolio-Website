@@ -172,6 +172,7 @@ const THEMES = {
   mono:    { label: 'MONO',    icon: '◈' },
   '8bit':  { label: '8-BIT',  icon: '▩' },
   cat:     { label: 'CAT',     icon: '🐱' },
+  apple:   { label: 'APPLE',   icon: '' },
 };
 
 function initThemeSwitcher() {
@@ -245,9 +246,20 @@ function initThemeSwitcher() {
     options.forEach(opt => {
       opt.setAttribute('aria-selected', opt.dataset.theme === theme ? 'true' : 'false');
     });
+
+    // Apple theme: activate / deactivate spring interactions
+    if (theme === 'apple') {
+      initAppleSpringCards();
+      initAppleNav();
+    } else {
+      document.querySelectorAll('.card, .project-card, .cert-entry, .skill-category, .contact-card')
+        .forEach(c => { c.style.transform = ''; c.style.willChange = ''; });
+      document.querySelector('.nav')?.classList.remove('apple-scrolled');
+    }
+
     // Show toast
-    const labels = { default: 'DEFAULT MODE', mono: 'MONOCHROME MODE', '8bit': '8-BIT MODE', cat: 'CAT MODE 🐱' };
-    showToast(`[THEME: ${labels[theme] || theme.toUpperCase()}]`, theme === 'default' ? 'granted' : 'granted');
+    const labels = { default: 'DEFAULT MODE', mono: 'MONOCHROME MODE', '8bit': '8-BIT MODE', cat: 'CAT MODE 🐱', apple: 'APPLE MODE ' };
+    showToast(`[THEME: ${labels[theme] || theme.toUpperCase()}]`, 'granted');
   }
 }
 
@@ -1177,6 +1189,7 @@ function playThemeGlitch(toTheme, onDone) {
     else if (toTheme === 'mono')    glitchStatic(ctx, intensity, W, H);
     else if (toTheme === '8bit')    glitchPixels(ctx, intensity, W, H);
     else if (toTheme === 'cat')     glitchCat(ctx, intensity, W, H);
+    else if (toTheme === 'apple')   glitchApple(ctx, intensity, W, H);
     else                            glitchChromatic(ctx, intensity, W, H);
 
     if (t < 1) requestAnimationFrame(frame);
@@ -1275,6 +1288,122 @@ function glitchCat(ctx, k, W, H) {
     ctx.fillText(PAWS[Math.floor(Math.random() * PAWS.length)],
       Math.random() * W, Math.random() * H);
   }
+}
+
+// Apple — clean white bloom dissolve, like Spotlight opening
+function glitchApple(ctx, k, W, H) {
+  // Bright white wash — clean macOS transition feel
+  ctx.fillStyle = `rgba(255,255,255,${0.92 * k})`;
+  ctx.fillRect(0, 0, W, H);
+  // Subtle SF-style concentric ripples from center
+  const cx = W / 2, cy = H / 2;
+  const maxR = Math.hypot(cx, cy);
+  for (let i = 0; i < 5; i++) {
+    const r = maxR * (0.2 + i * 0.18) * k;
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 0, Math.PI * 2);
+    ctx.strokeStyle = `rgba(0,122,255,${(0.12 - i * 0.02) * k})`;
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+  }
+  // Soft blue tint at edges (vibrancy hint)
+  const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, maxR);
+  grad.addColorStop(0,   `rgba(255,255,255,0)`);
+  grad.addColorStop(0.7, `rgba(0,122,255,${0.06 * k})`);
+  grad.addColorStop(1,   `rgba(0,122,255,${0.14 * k})`);
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, W, H);
+}
+
+// ─── Apple theme: spring-physics card interactions ───────────
+// Implements §1 (pointer-down response), §3 (interruptibility),
+// §4 (critically-damped spring), §5 (velocity handoff)
+function initAppleSpringCards() {
+  const cards = document.querySelectorAll('.card, .project-card, .cert-entry, .skill-category, .contact-card');
+
+  cards.forEach(card => {
+    let raf      = null;
+    let velX     = 0, velY = 0;
+    let curX     = 0, curY = 0;
+    let curScale = 1;
+    let targetX  = 0, targetY = 0, targetScale = 1;
+
+    // Spring constants — Apple §4: critically damped (damping=1.0, response≈0.35s)
+    const STIFFNESS = 320;
+    const DAMPING   = 2 * Math.sqrt(STIFFNESS); // critical damping
+    const MASS      = 1;
+
+    function springStep(dt) {
+      // Independent X, Y, scale springs (§3: decompose 2D motion)
+      const stepSpring = (cur, vel, tgt) => {
+        const force = -STIFFNESS * (cur - tgt) - DAMPING * vel;
+        const newVel = vel + (force / MASS) * dt;
+        const newPos = cur + newVel * dt;
+        return [newPos, newVel];
+      };
+      [curX, velX] = stepSpring(curX, velX, targetX);
+      [curY, velY] = stepSpring(curY, velY, targetY);
+      const [newScale, velScale2] = stepSpring(curScale, 0, targetScale);
+      curScale = newScale;
+
+      card.style.transform = `translate(${curX.toFixed(2)}px, ${curY.toFixed(2)}px) scale(${curScale.toFixed(4)})`;
+
+      const settled =
+        Math.abs(curX - targetX) < 0.01 && Math.abs(velX) < 0.01 &&
+        Math.abs(curY - targetY) < 0.01 && Math.abs(velY) < 0.01 &&
+        Math.abs(curScale - targetScale) < 0.0001;
+
+      if (!settled) {
+        raf = requestAnimationFrame(() => springStep(1 / 120));
+      } else {
+        curX = targetX; curY = targetY; curScale = targetScale;
+        card.style.transform = curX === 0 && curY === 0 && curScale === 1
+          ? '' : `translate(${curX}px,${curY}px) scale(${curScale})`;
+        raf = null;
+      }
+    }
+
+    function animateTo(tx, ty, ts) {
+      targetX = tx; targetY = ty; targetScale = ts;
+      if (raf) cancelAnimationFrame(raf); // §3: interruptible mid-flight
+      raf = requestAnimationFrame(() => springStep(1 / 120));
+    }
+
+    // §1: Respond on pointer-down instantly (scale down = tactile press)
+    card.addEventListener('pointerdown', () => {
+      card.style.willChange = 'transform';
+      animateTo(0, 0, 0.97);
+    });
+
+    // On release — spring back with slight lift (§5: velocity carries through)
+    card.addEventListener('pointerup',    () => animateTo(0, -2, 1.00));
+    card.addEventListener('pointercancel',() => animateTo(0, 0,  1.00));
+
+    // Hover: subtle lift — critically damped, no bounce (§4)
+    card.addEventListener('mouseenter', (e) => {
+      animateTo(0, -3, 1.018);
+    });
+    card.addEventListener('mouseleave', () => {
+      animateTo(0, 0, 1.0);
+    });
+
+    // Cleanup will-change after settle
+    card.addEventListener('transitionend', () => {
+      if (!raf) card.style.willChange = '';
+    });
+  });
+}
+
+// ─── Apple theme: nav frosted glass scroll effect ────────────
+function initAppleNav() {
+  const nav = document.querySelector('.nav');
+  if (!nav) return;
+  const onScroll = () => {
+    const scrolled = window.scrollY > 10;
+    nav.classList.toggle('apple-scrolled', scrolled);
+  };
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
 }
 
 // ─── CRASH SEQUENCE — TEXT CORRUPTION VIRUS ──────────────────
